@@ -1,0 +1,26 @@
+// TEMPORARY Firestore Security Rules for Database Setup
+// Use these rules ONLY during database population, then restore secure rules
+
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow read/write for schedule_suffixes during setup
+    match /schedule_suffixes/{document} {
+      allow read, write: if true; // TEMPORARY - remove after setup
+    }
+    
+    // Allow read/write for cities during setup  
+    match /cities/{document} {
+      allow read, write: if true; // TEMPORARY - remove after setup
+    }
+    
+    // Keep existing rules for other collections
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    match /student_profiles/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}

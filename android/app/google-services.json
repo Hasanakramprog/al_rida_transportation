@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "558137143032",
+    "project_id": "al-rida-app",
+    "storage_bucket": "al-rida-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:558137143032:android:fbbb3543768a6e0d70550d",
+        "android_client_info": {
+          "package_name": "com.alrida.app.al_rida_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "558137143032-3097ppumjbrloh0dlbqj2bgnqtrrm3c5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.alrida.app.al_rida_app",
+            "certificate_hash": "cab76b80a73df019b05e832124e5b4f3a97db2c7"
+          }
+        },
+        {
+          "client_id": "558137143032-31i9c5dd32bqgudrte9e0atvbaup00lo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA2oyyjjQJtcaKDqaCQHLKNUo2Hfr5tJbY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "558137143032-31i9c5dd32bqgudrte9e0atvbaup00lo.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
