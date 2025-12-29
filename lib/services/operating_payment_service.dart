@@ -7,7 +7,7 @@ class OperatingPaymentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AccountingService _accountingService = AccountingService();
   final DriverWalletService _driverWalletService = DriverWalletService();
-  
+
   static const String _paymentsCollection = 'operating_payments';
 
   // Add operating payment and decrement from admin wallet, increment driver wallet
@@ -35,7 +35,7 @@ class OperatingPaymentService {
 
       // Decrement from admin wallet
       await _accountingService.subtractFromAdminWallet(amount, currency);
-      
+
       // Increment driver wallet
       await _driverWalletService.addToDriverWallet(driverId, amount, currency);
     } catch (e) {

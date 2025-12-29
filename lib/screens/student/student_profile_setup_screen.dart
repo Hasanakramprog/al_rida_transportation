@@ -9,7 +9,8 @@ class StudentProfileSetupScreen extends StatefulWidget {
   const StudentProfileSetupScreen({super.key});
 
   @override
-  State<StudentProfileSetupScreen> createState() => _StudentProfileSetupScreenState();
+  State<StudentProfileSetupScreen> createState() =>
+      _StudentProfileSetupScreenState();
 }
 
 class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
@@ -17,7 +18,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
   final _profileService = StudentProfileService();
   final _fullNameController = TextEditingController();
   final _phoneController = TextEditingController();
-  
+
   SubscriptionType _selectedSubscription = SubscriptionType.monthly;
   ScheduleSuffix? _selectedSchedule;
   City? _selectedCity;
@@ -33,7 +34,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
   // Hardcoded university list
   final List<String> _universities = [
     'Cairo University',
-    'Alexandria University', 
+    'Alexandria University',
     'Ain Shams University',
     'American University in Cairo (AUC)',
     'German University in Cairo (GUC)',
@@ -56,7 +57,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
     'Arish University',
     'New Valley University',
     'Matrouh University',
-    'Other University'
+    'Other University',
   ];
 
   String? get _costDescription {
@@ -137,7 +138,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
 
   Future<void> _onScheduleChanged(ScheduleSuffix? schedule) async {
     if (schedule == null) return;
-    
+
     setState(() {
       _selectedSchedule = schedule;
       _selectedCity = null; // Reset city when schedule changes
@@ -168,8 +169,6 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
     }
   }
 
-
-
   Future<void> _saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
     if (_fullNameController.text.trim().isEmpty) {
@@ -198,13 +197,16 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final user = authService.currentUser;
-      
+
       if (user == null) {
         throw 'User not found';
       }
 
       // Format phone number with +961 prefix
-      String formattedPhone = _phoneController.text.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
+      String formattedPhone = _phoneController.text.trim().replaceAll(
+        RegExp(r'[\s\-\(\)]'),
+        '',
+      );
       // Remove leading 0 if present
       if (formattedPhone.startsWith('0')) {
         formattedPhone = formattedPhone.substring(1);
@@ -228,10 +230,10 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
       );
 
       // Don't save to database yet - save in calendar screen
-      
+
       if (mounted) {
         _showSnackBar('Profile completed! Now select your days.', Colors.green);
-        
+
         // Navigate to calendar screen
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
@@ -251,18 +253,15 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
   }
 
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: color,
-      ),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Complete Your Profile'),
@@ -276,10 +275,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              colorScheme.primary.withOpacity(0.05),
-              Colors.white,
-            ],
+            colors: [colorScheme.primary.withOpacity(0.05), Colors.white],
           ),
         ),
         child: SafeArea(
@@ -324,10 +320,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                   Text(
                     'Please provide your information',
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
                   ),
                   const SizedBox(height: 24),
 
@@ -338,7 +331,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                     decoration: InputDecoration(
                       labelText: 'Full Name',
                       hintText: 'Enter your full name',
-                      prefixIcon: Icon(Icons.person_outline, color: colorScheme.primary, size: 20),
+                      prefixIcon: Icon(
+                        Icons.person_outline,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -348,11 +345,17 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                          color: colorScheme.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                     textCapitalization: TextCapitalization.words,
                     validator: (value) {
@@ -371,7 +374,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                   DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'University Name',
-                      prefixIcon: Icon(Icons.school_outlined, color: colorScheme.primary, size: 20),
+                      prefixIcon: Icon(
+                        Icons.school_outlined,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -381,11 +388,17 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                          color: colorScheme.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                     isExpanded: true,
                     value: _selectedUniversity,
@@ -420,7 +433,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                     decoration: InputDecoration(
                       labelText: 'Lebanese Phone Number',
                       hintText: 'e.g. 70 123 456',
-                      prefixIcon: Icon(Icons.phone_outlined, color: colorScheme.primary, size: 20),
+                      prefixIcon: Icon(
+                        Icons.phone_outlined,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
                       prefixText: '+961 ',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
@@ -431,24 +448,35 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                          color: colorScheme.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                     keyboardType: TextInputType.phone,
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter your phone number';
                       }
-                      
+
                       // Remove spaces, hyphens, and parentheses for validation
-                      final cleanPhone = value.trim().replaceAll(RegExp(r'[\s\-\(\)]'), '');
-                      
+                      final cleanPhone = value.trim().replaceAll(
+                        RegExp(r'[\s\-\(\)]'),
+                        '',
+                      );
+
                       // Lebanese mobile number patterns: 03, 70, 71, 76, 78, 79, 81 + 6 digits (total 8 digits)
-                      final lebanonMobileRegex = RegExp(r'^(0?3|0?70|0?71|0?76|0?78|0?79|0?81)[0-9]{6}$');
-                      
+                      final lebanonMobileRegex = RegExp(
+                        r'^(0?3|0?70|0?71|0?76|0?78|0?79|0?81)[0-9]{6}$',
+                      );
+
                       if (!lebanonMobileRegex.hasMatch(cleanPhone)) {
                         return 'Enter valid Lebanese mobile (e.g. 70 123 456)';
                       }
@@ -477,11 +505,22 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                       children: [
                         Expanded(
                           child: RadioListTile<SubscriptionType>(
-                            title: const Text('Monthly', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text('15% discount', style: TextStyle(fontSize: 12)),
+                            title: const Text(
+                              'Monthly',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              '15% discount',
+                              style: TextStyle(fontSize: 12),
+                            ),
                             value: SubscriptionType.monthly,
                             groupValue: _selectedSubscription,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
                             onChanged: (value) {
                               if (value != null) {
                                 setState(() => _selectedSubscription = value);
@@ -491,11 +530,22 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                         ),
                         Expanded(
                           child: RadioListTile<SubscriptionType>(
-                            title: const Text('Daily', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            subtitle: const Text('Pay per day', style: TextStyle(fontSize: 12)),
+                            title: const Text(
+                              'Daily',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            subtitle: const Text(
+                              'Pay per day',
+                              style: TextStyle(fontSize: 12),
+                            ),
                             value: SubscriptionType.daily,
                             groupValue: _selectedSubscription,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
                             onChanged: (value) {
                               if (value != null) {
                                 setState(() => _selectedSubscription = value);
@@ -515,7 +565,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                     DropdownButtonFormField<ScheduleSuffix>(
                       decoration: InputDecoration(
                         labelText: 'Schedule Suffix',
-                        prefixIcon: Icon(Icons.schedule_outlined, color: colorScheme.primary, size: 20),
+                        prefixIcon: Icon(
+                          Icons.schedule_outlined,
+                          color: colorScheme.primary,
+                          size: 20,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
@@ -525,11 +579,17 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                          borderSide: BorderSide(
+                            color: colorScheme.primary,
+                            width: 2,
+                          ),
                         ),
                         filled: true,
                         fillColor: Colors.grey.shade50,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
                       ),
                       value: _selectedSchedule,
                       items: _availableSchedules.map((suffix) {
@@ -564,14 +624,20 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                           ],
                         ),
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: colorScheme.primary.withOpacity(0.3)),
+                        border: Border.all(
+                          color: colorScheme.primary.withOpacity(0.3),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
-                              Icon(Icons.payments_outlined, color: colorScheme.primary, size: 18),
+                              Icon(
+                                Icons.payments_outlined,
+                                color: colorScheme.primary,
+                                size: 18,
+                              ),
                               const SizedBox(width: 8),
                               Text(
                                 'Subscription Cost',
@@ -609,7 +675,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                   DropdownButtonFormField<City>(
                     decoration: InputDecoration(
                       labelText: 'City',
-                      prefixIcon: Icon(Icons.location_city_outlined, color: colorScheme.primary, size: 20),
+                      prefixIcon: Icon(
+                        Icons.location_city_outlined,
+                        color: colorScheme.primary,
+                        size: 20,
+                      ),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -619,18 +689,26 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: colorScheme.primary, width: 2),
+                        borderSide: BorderSide(
+                          color: colorScheme.primary,
+                          width: 2,
+                        ),
                       ),
                       filled: true,
                       fillColor: Colors.grey.shade50,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      suffixIcon: _loadingCities 
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      suffixIcon: _loadingCities
                           ? const SizedBox(
                               width: 20,
                               height: 20,
                               child: Padding(
                                 padding: EdgeInsets.all(12.0),
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                             )
                           : null,
@@ -645,9 +723,11 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                         ),
                       );
                     }).toList(),
-                    onChanged: _selectedSchedule == null ? null : (city) {
-                      setState(() => _selectedCity = city);
-                    },
+                    onChanged: _selectedSchedule == null
+                        ? null
+                        : (city) {
+                            setState(() => _selectedCity = city);
+                          },
                     validator: (value) {
                       if (value == null) {
                         return 'Please select a city';
@@ -656,10 +736,15 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                     },
                   ),
                   const SizedBox(height: 8),
-                  if (_selectedSchedule != null && _availableCities.isEmpty && !_loadingCities)
+                  if (_selectedSchedule != null &&
+                      _availableCities.isEmpty &&
+                      !_loadingCities)
                     Text(
                       'No cities available for selected zone',
-                      style: TextStyle(color: Colors.orange.shade700, fontSize: 12),
+                      style: TextStyle(
+                        color: Colors.orange.shade700,
+                        fontSize: 12,
+                      ),
                     ),
                   const SizedBox(height: 24),
 
@@ -733,12 +818,17 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                         else if (_allCitiesByZone.isNotEmpty) ...[
                           ...['A', 'B', 'C', 'D'].map((zone) {
                             final cities = _allCitiesByZone[zone] ?? [];
-                            final cityNames = cities.map((city) => city.name).join(', ');
+                            final cityNames = cities
+                                .map((city) => city.name)
+                                .join(', ');
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 3),
                               child: Text(
                                 '• Zone $zone (${zone}1-${zone}5): ${cityNames.isNotEmpty ? cityNames : 'No cities'}',
-                                style: const TextStyle(fontSize: 11, color: Colors.grey),
+                                style: const TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey,
+                                ),
                               ),
                             );
                           }),
@@ -749,7 +839,7 @@ class _StudentProfileSetupScreenState extends State<StudentProfileSetupScreen> {
                           ),
                         const SizedBox(height: 6),
                         Text(
-                          'Select your schedule suffix (zone + days per week) to see available cities', 
+                          'Select your schedule suffix (zone + days per week) to see available cities',
                           style: TextStyle(
                             fontSize: 11,
                             color: colorScheme.primary,

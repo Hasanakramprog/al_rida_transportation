@@ -7,7 +7,8 @@ class MonthlyPayment {
   final int month;
   final double monthlyAmount; // Total cost for this month
   final double paidAmount; // Amount already paid
-  final double remainingAmount; // Amount still owed (monthlyAmount - paidAmount)
+  final double
+  remainingAmount; // Amount still owed (monthlyAmount - paidAmount)
   final bool isPaid; // True when remainingAmount is 0
   final DateTime? paidAt;
   final String? paidBy; // Admin who processed the payment
@@ -31,8 +32,18 @@ class MonthlyPayment {
 
   String get monthName {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return months[month - 1];
   }
@@ -43,14 +54,14 @@ class MonthlyPayment {
   bool get isFullyPaid => remainingAmount <= 0;
   bool get isPartiallyPaid => paidAmount > 0 && remainingAmount > 0;
   bool get isUnpaid => paidAmount <= 0;
-  
+
   // Payment status text
   String get paymentStatus {
     if (isFullyPaid) return 'Fully Paid';
     if (isPartiallyPaid) return 'Partially Paid';
     return 'Unpaid';
   }
-  
+
   // Percentage paid
   double get paymentPercentage {
     if (monthlyAmount <= 0) return 0.0;
@@ -77,7 +88,7 @@ class MonthlyPayment {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
     final monthlyAmount = (data['monthlyAmount'] ?? 0.0).toDouble();
     final paidAmount = (data['paidAmount'] ?? 0.0).toDouble();
-    
+
     return MonthlyPayment(
       id: doc.id,
       studentUid: data['studentUid'] ?? '',

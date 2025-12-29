@@ -9,7 +9,8 @@ class Driver {
   final bool isActive;
   final DateTime createdAt;
   final DateTime updatedAt;
-  final Map<String, List<String>> tripAssignments; // day -> list of trips ['trip1', 'trip2', 'trip3']
+  final Map<String, List<String>>
+  tripAssignments; // day -> list of trips ['trip1', 'trip2', 'trip3']
 
   Driver({
     required this.uid,
@@ -26,16 +27,18 @@ class Driver {
   // Create from Firestore document
   factory Driver.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    
+
     // Parse tripAssignments
     Map<String, List<String>> tripAssignments = {};
     if (data['tripAssignments'] != null) {
-      Map<String, dynamic> tripData = Map<String, dynamic>.from(data['tripAssignments']);
+      Map<String, dynamic> tripData = Map<String, dynamic>.from(
+        data['tripAssignments'],
+      );
       tripData.forEach((day, trips) {
         tripAssignments[day] = List<String>.from(trips ?? []);
       });
     }
-    
+
     return Driver(
       uid: doc.id,
       fullName: data['fullName'] ?? '',

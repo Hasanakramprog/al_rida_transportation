@@ -28,7 +28,9 @@ class AppUser {
       'displayName': displayName,
       'role': role.name,
       'createdAt': Timestamp.fromDate(createdAt),
-      'lastLoginAt': lastLoginAt != null ? Timestamp.fromDate(lastLoginAt!) : null,
+      'lastLoginAt': lastLoginAt != null
+          ? Timestamp.fromDate(lastLoginAt!)
+          : null,
       'isActive': isActive,
     };
   }

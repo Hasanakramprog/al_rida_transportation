@@ -62,12 +62,12 @@ class PaymentTransaction {
   }
 
   // Format display
-  String get formattedAmount => '${currency == 'USD' ? '\$' : 'LL'}${NumberFormat('#,###').format(amount.toInt())}';
-  
+  String get formattedAmount =>
+      '${currency == 'USD' ? '\$' : 'LL'}${NumberFormat('#,###').format(amount.toInt())}';
+
   String get formattedDate {
     return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';
   }
 
   String get subscriptionPeriod => '$subscriptionMonth/$subscriptionYear';
 }
-

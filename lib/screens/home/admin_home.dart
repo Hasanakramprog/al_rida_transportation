@@ -50,10 +50,7 @@ class AdminHomeScreen extends StatelessWidget {
                     Text(
                       'Manage users, drivers, and system settings',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.grey),
                     ),
                   ],
                 ),
@@ -73,70 +70,90 @@ class AdminHomeScreen extends StatelessWidget {
                     title: 'Manage Students',
                     subtitle: 'View and manage all students',
                     color: Colors.blue,
-                    onTap: () => Navigator.pushNamed(context, '/admin/students'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/students'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.wb_sunny,
                     title: 'Morning Trips',
                     subtitle: 'Assign students to drivers',
                     color: Colors.green,
-                    onTap: () => Navigator.pushNamed(context, '/admin/driver_assignment'),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/admin/driver_assignment',
+                    ),
                   ),
                   _buildFeatureCard(
                     icon: Icons.wb_twilight,
                     title: 'Trip Management',
                     subtitle: 'Assign afternoon trips (1-3 PM)',
                     color: Colors.deepPurple,
-                    onTap: () => Navigator.pushNamed(context, '/admin/trip-management'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/trip-management'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.calendar_month,
                     title: 'Subscriptions',
                     subtitle: 'Manage schedule suffixes & pricing',
                     color: Colors.orange,
-                    onTap: () => Navigator.pushNamed(context, '/admin/subscriptions'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/subscriptions'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.map,
                     title: 'Routes & Schedules',
                     subtitle: 'Manage bus routes and schedules',
                     color: Colors.brown,
-                    onTap: () => _showSnackBar(context, 'Routes & Schedules feature coming soon!'),
+                    onTap: () => _showSnackBar(
+                      context,
+                      'Routes & Schedules feature coming soon!',
+                    ),
                   ),
                   _buildFeatureCard(
                     icon: Icons.bar_chart,
                     title: 'Reports',
                     subtitle: 'View analytics and reports',
                     color: Colors.purple,
-                    onTap: () => _showSnackBar(context, 'Reports feature coming soon!'),
+                    onTap: () =>
+                        _showSnackBar(context, 'Reports feature coming soon!'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.tune,
                     title: 'System Settings',
                     subtitle: 'Configure app settings',
                     color: Colors.teal,
-                    onTap: () => _showSnackBar(context, 'System Settings feature coming soon!'),
+                    onTap: () => _showSnackBar(
+                      context,
+                      'System Settings feature coming soon!',
+                    ),
                   ),
                   _buildFeatureCard(
                     icon: Icons.campaign,
                     title: 'Send Notifications',
                     subtitle: 'Send alerts to users',
                     color: Colors.indigo,
-                    onTap: () => _showSnackBar(context, 'Send Notifications feature coming soon!'),
+                    onTap: () => _showSnackBar(
+                      context,
+                      'Send Notifications feature coming soon!',
+                    ),
                   ),
                   _buildFeatureCard(
                     icon: Icons.account_balance_wallet,
                     title: 'Accounting',
                     subtitle: 'View payments & transactions',
                     color: Colors.green.shade700,
-                    onTap: () => Navigator.pushNamed(context, '/admin/accounting'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/admin/accounting'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.directions_bus,
                     title: 'Operating Payments',
                     subtitle: 'Fuel, maintenance & salaries',
                     color: Colors.amber.shade700,
-                    onTap: () => Navigator.pushNamed(context, '/admin/operating-payments'),
+                    onTap: () => Navigator.pushNamed(
+                      context,
+                      '/admin/operating-payments',
+                    ),
                   ),
                 ],
               ),
@@ -164,11 +181,7 @@ class AdminHomeScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 36,
-                color: color,
-              ),
+              Icon(icon, size: 36, color: color),
               const SizedBox(height: 8),
               Text(
                 title,
@@ -182,10 +195,7 @@ class AdminHomeScreen extends StatelessWidget {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -198,17 +208,14 @@ class AdminHomeScreen extends StatelessWidget {
 
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 
   Future<void> _signOut(BuildContext context) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.signOut();
-    
+
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),

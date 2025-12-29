@@ -35,23 +35,28 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final user = authService.currentUser;
-      
+
       if (user != null) {
         final profile = await _profileService.getStudentProfile(user.uid);
-        
+
         // Load current month payment status
         MonthlyPayment? currentPayment;
         List<MonthlyPayment> recentPayments = [];
-        
+
         if (profile != null) {
           try {
-            currentPayment = await _paymentService.getCurrentMonthPayment(user.uid);
-            recentPayments = await _paymentService.getMyPaymentHistory(user.uid, limit: 3);
+            currentPayment = await _paymentService.getCurrentMonthPayment(
+              user.uid,
+            );
+            recentPayments = await _paymentService.getMyPaymentHistory(
+              user.uid,
+              limit: 3,
+            );
           } catch (e) {
             print('Error loading payment data: $e');
           }
         }
-        
+
         if (mounted) {
           setState(() {
             _studentProfile = profile;
@@ -106,10 +111,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _errorMessage != null
-              ? _buildErrorView()
-              : _studentProfile == null
-                  ? _buildNoProfileView()
-                  : _buildProfileView(user),
+          ? _buildErrorView()
+          : _studentProfile == null
+          ? _buildNoProfileView()
+          : _buildProfileView(user),
     );
   }
 
@@ -158,16 +163,13 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   Widget _buildProfileView(user) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [
-            colorScheme.primary.withOpacity(0.05),
-            Colors.white,
-          ],
+          colors: [colorScheme.primary.withOpacity(0.05), Colors.white],
         ),
       ),
       child: RefreshIndicator(
@@ -207,17 +209,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   Widget _buildWelcomeHeader(user) {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Container(
       padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            colorScheme.primary,
-            colorScheme.primary.withOpacity(0.8),
-          ],
+          colors: [colorScheme.primary, colorScheme.primary.withOpacity(0.8)],
         ),
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
@@ -240,7 +239,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               radius: 35,
               backgroundColor: Colors.white,
               child: Text(
-                (user?.displayName?.isNotEmpty == true 
+                (user?.displayName?.isNotEmpty == true
                     ? user!.displayName![0].toUpperCase()
                     : user?.email?[0].toUpperCase() ?? 'S'),
                 style: TextStyle(
@@ -304,12 +303,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   Widget _buildPersonalInfoCard() {
     final colorScheme = Theme.of(context).colorScheme;
-    
+
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -323,7 +320,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     color: colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Icon(Icons.person_outline, color: colorScheme.primary, size: 20),
+                  child: Icon(
+                    Icons.person_outline,
+                    color: colorScheme.primary,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Text(
@@ -337,15 +338,29 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            _buildInfoRow('University', _studentProfile!.university, Icons.school_outlined),
+            _buildInfoRow(
+              'University',
+              _studentProfile!.university,
+              Icons.school_outlined,
+            ),
             const SizedBox(height: 10),
-            _buildInfoRow('Phone Number', _studentProfile!.phoneNumber, Icons.phone_outlined),
+            _buildInfoRow(
+              'Phone Number',
+              _studentProfile!.phoneNumber,
+              Icons.phone_outlined,
+            ),
             const SizedBox(height: 10),
-            _buildInfoRow('Student ID', _studentProfile!.uid.substring(0, 8) + '...', Icons.badge_outlined),
+            _buildInfoRow(
+              'Student ID',
+              _studentProfile!.uid.substring(0, 8) + '...',
+              Icons.badge_outlined,
+            ),
             const SizedBox(height: 10),
-            _buildInfoRow('Registration Date', 
-              '${_studentProfile!.createdAt.day}/${_studentProfile!.createdAt.month}/${_studentProfile!.createdAt.year}', 
-              Icons.calendar_today_outlined),
+            _buildInfoRow(
+              'Registration Date',
+              '${_studentProfile!.createdAt.day}/${_studentProfile!.createdAt.month}/${_studentProfile!.createdAt.year}',
+              Icons.calendar_today_outlined,
+            ),
           ],
         ),
       ),
@@ -355,9 +370,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget _buildTransportationCard() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -371,7 +384,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     color: Colors.orange.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.directions_bus_outlined, color: Colors.orange, size: 20),
+                  child: const Icon(
+                    Icons.directions_bus_outlined,
+                    color: Colors.orange,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Text(
@@ -385,14 +402,23 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               ],
             ),
             const SizedBox(height: 14),
-            _buildInfoRow('City', 
-              '${_studentProfile!.city.name} (Zone ${_studentProfile!.city.zone})', Icons.location_on_outlined),
+            _buildInfoRow(
+              'City',
+              '${_studentProfile!.city.name} (Zone ${_studentProfile!.city.zone})',
+              Icons.location_on_outlined,
+            ),
             const SizedBox(height: 10),
-            _buildInfoRow('Schedule Code', _studentProfile!.scheduleSuffix.code, Icons.schedule_outlined),
+            _buildInfoRow(
+              'Schedule Code',
+              _studentProfile!.scheduleSuffix.code,
+              Icons.schedule_outlined,
+            ),
             const SizedBox(height: 10),
-            _buildInfoRow('Days Per Week', 
-              '${_studentProfile!.scheduleSuffix.daysPerWeek} ${_studentProfile!.scheduleSuffix.daysPerWeek == 1 ? 'day' : 'days'}', 
-              Icons.calendar_today_outlined),
+            _buildInfoRow(
+              'Days Per Week',
+              '${_studentProfile!.scheduleSuffix.daysPerWeek} ${_studentProfile!.scheduleSuffix.daysPerWeek == 1 ? 'day' : 'days'}',
+              Icons.calendar_today_outlined,
+            ),
           ],
         ),
       ),
@@ -402,9 +428,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget _buildScheduleCard() {
     return Card(
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -418,7 +442,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     color: Colors.purple.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: const Icon(Icons.access_time_outlined, color: Colors.purple, size: 20),
+                  child: const Icon(
+                    Icons.access_time_outlined,
+                    color: Colors.purple,
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 const Text(
@@ -433,8 +461,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             ),
             const SizedBox(height: 14),
             if (_studentProfile!.selectedDays.isNotEmpty) ...[
-              _buildInfoRow('Selected Days', 
-                _studentProfile!.selectedDays.join(', '), Icons.calendar_month_outlined),
+              _buildInfoRow(
+                'Selected Days',
+                _studentProfile!.selectedDays.join(', '),
+                Icons.calendar_month_outlined,
+              ),
               const SizedBox(height: 10),
               _buildDayTimeSlots(),
             ] else
@@ -442,7 +473,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 padding: EdgeInsets.symmetric(vertical: 8.0),
                 child: Text(
                   'No schedule selected yet',
-                  style: TextStyle(color: Colors.grey, fontStyle: FontStyle.italic),
+                  style: TextStyle(
+                    color: Colors.grey,
+                    fontStyle: FontStyle.italic,
+                  ),
                 ),
               ),
           ],
@@ -454,13 +488,15 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget _buildPaymentCard() {
     final currentMonth = DateTime.now();
     final isCurrentMonthPaid = _currentMonthPayment?.isPaid ?? false;
-    
+
     return Card(
       elevation: 2,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isCurrentMonthPaid ? Colors.green.withOpacity(0.3) : Colors.red.withOpacity(0.3),
+          color: isCurrentMonthPaid
+              ? Colors.green.withOpacity(0.3)
+              : Colors.red.withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -479,12 +515,15 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: (isCurrentMonthPaid ? Colors.green : Colors.red).withOpacity(0.1),
+                      color: (isCurrentMonthPaid ? Colors.green : Colors.red)
+                          .withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      isCurrentMonthPaid ? Icons.check_circle_outline : Icons.payment_outlined, 
-                      color: isCurrentMonthPaid ? Colors.green : Colors.red, 
+                      isCurrentMonthPaid
+                          ? Icons.check_circle_outline
+                          : Icons.payment_outlined,
+                      color: isCurrentMonthPaid ? Colors.green : Colors.red,
                       size: 20,
                     ),
                   ),
@@ -507,34 +546,39 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 ],
               ),
               const SizedBox(height: 14),
-              
+
               // Subscription Information
-              _buildInfoRow('Subscription Type', 
-                _studentProfile!.subscriptionType.displayName, Icons.card_membership_outlined),
+              _buildInfoRow(
+                'Subscription Type',
+                _studentProfile!.subscriptionType.displayName,
+                Icons.card_membership_outlined,
+              ),
               const SizedBox(height: 10),
-              _buildInfoRow('Monthly Cost', 
-                _currentMonthPayment != null 
-                  ? '\$${_currentMonthPayment!.monthlyAmount.toStringAsFixed(2)}'
-                  : '\$${_studentProfile!.subscriptionCost.toStringAsFixed(2)}', 
-                Icons.attach_money_outlined),
-              
+              _buildInfoRow(
+                'Monthly Cost',
+                _currentMonthPayment != null
+                    ? '\$${_currentMonthPayment!.monthlyAmount.toStringAsFixed(2)}'
+                    : '\$${_studentProfile!.subscriptionCost.toStringAsFixed(2)}',
+                Icons.attach_money_outlined,
+              ),
+
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 12.0),
                 child: Divider(height: 1, color: Colors.grey.shade300),
               ),
-              
+
               // Current Month Status
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: isCurrentMonthPaid 
-                    ? Colors.green.withOpacity(0.1) 
-                    : Colors.red.withOpacity(0.1),
+                  color: isCurrentMonthPaid
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.red.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                   border: Border.all(
-                    color: isCurrentMonthPaid 
-                      ? Colors.green.withOpacity(0.3) 
-                      : Colors.red.withOpacity(0.3),
+                    color: isCurrentMonthPaid
+                        ? Colors.green.withOpacity(0.3)
+                        : Colors.red.withOpacity(0.3),
                   ),
                 ),
                 child: Column(
@@ -553,7 +597,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.bold,
-                            color: isCurrentMonthPaid ? Colors.green : Colors.red,
+                            color: isCurrentMonthPaid
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ],
@@ -562,7 +608,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                     Row(
                       children: [
                         Icon(
-                          isCurrentMonthPaid ? Icons.check_circle : Icons.pending_outlined,
+                          isCurrentMonthPaid
+                              ? Icons.check_circle
+                              : Icons.pending_outlined,
                           size: 18,
                           color: isCurrentMonthPaid ? Colors.green : Colors.red,
                         ),
@@ -572,16 +620,23 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
-                            color: isCurrentMonthPaid ? Colors.green : Colors.red,
+                            color: isCurrentMonthPaid
+                                ? Colors.green
+                                : Colors.red,
                           ),
                         ),
                       ],
                     ),
-                    if (isCurrentMonthPaid && _currentMonthPayment?.paidAt != null) ...[
+                    if (isCurrentMonthPaid &&
+                        _currentMonthPayment?.paidAt != null) ...[
                       const SizedBox(height: 6),
                       Row(
                         children: [
-                          Icon(Icons.event_available, size: 14, color: Colors.green.shade700),
+                          Icon(
+                            Icons.event_available,
+                            size: 14,
+                            color: Colors.green.shade700,
+                          ),
                           const SizedBox(width: 6),
                           Text(
                             'Paid on ${_currentMonthPayment!.paidAt!.day}/${_currentMonthPayment!.paidAt!.month}/${_currentMonthPayment!.paidAt!.year}',
@@ -596,13 +651,17 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   ],
                 ),
               ),
-              
+
               // Payment History
               if (_recentPayments.isNotEmpty) ...[
                 const SizedBox(height: 14),
                 Row(
                   children: [
-                    Icon(Icons.history_outlined, size: 16, color: Colors.grey.shade700),
+                    Icon(
+                      Icons.history_outlined,
+                      size: 16,
+                      color: Colors.grey.shade700,
+                    ),
                     const SizedBox(width: 6),
                     Text(
                       'Recent Payments',
@@ -625,15 +684,17 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 
   Widget _buildPaymentHistory() {
-    final paidPayments = _recentPayments.where((payment) => payment.isPaid).toList();
-    
+    final paidPayments = _recentPayments
+        .where((payment) => payment.isPaid)
+        .toList();
+
     if (paidPayments.isEmpty) {
       return const Text(
         'No payment history available',
         style: TextStyle(fontSize: 14, color: Colors.grey),
       );
     }
-    
+
     return Column(
       children: paidPayments.map((payment) {
         return Container(
@@ -654,12 +715,15 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   children: [
                     Text(
                       '${payment.monthName} ${payment.year}',
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
-                      payment.paidAt != null 
-                        ? 'Paid on ${payment.paidAt!.day}/${payment.paidAt!.month}/${payment.paidAt!.year}'
-                        : 'Payment date not available',
+                      payment.paidAt != null
+                          ? 'Paid on ${payment.paidAt!.day}/${payment.paidAt!.month}/${payment.paidAt!.year}'
+                          : 'Payment date not available',
                       style: const TextStyle(fontSize: 11, color: Colors.grey),
                     ),
                   ],
@@ -682,15 +746,25 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   String _getMonthName(int month) {
     const months = [
-      'January', 'February', 'March', 'April', 'May', 'June',
-      'July', 'August', 'September', 'October', 'November', 'December'
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
     ];
     return months[month - 1];
   }
 
   Widget _buildActionButtons() {
     final canEdit = StudentProfile.canEditThisMonth();
-    
+
     return Column(
       children: [
         // Edit Restriction Info
@@ -717,7 +791,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   StudentProfile.getEditRestrictionMessage(),
                   style: TextStyle(
                     fontSize: 12,
-                    color: canEdit ? Colors.green.shade700 : Colors.orange.shade700,
+                    color: canEdit
+                        ? Colors.green.shade700
+                        : Colors.orange.shade700,
                   ),
                 ),
               ),
@@ -729,18 +805,21 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           width: double.infinity,
           height: 45,
           child: ElevatedButton.icon(
-            onPressed: canEdit 
-              ? () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => WeekCalendarScreen(
-                        studentProfile: _studentProfile!,
+            onPressed: canEdit
+                ? () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => WeekCalendarScreen(
+                          studentProfile: _studentProfile!,
+                        ),
                       ),
-                    ),
-                  );
-                }
-              : () => _showSnackBar(context, StudentProfile.getEditRestrictionMessage()),
+                    );
+                  }
+                : () => _showSnackBar(
+                    context,
+                    StudentProfile.getEditRestrictionMessage(),
+                  ),
             icon: Icon(canEdit ? Icons.edit : Icons.lock),
             label: Text(canEdit ? 'Edit Schedule' : 'Schedule Locked'),
             style: ElevatedButton.styleFrom(
@@ -754,7 +833,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => _showSnackBar(context, 'Track bus feature coming soon!'),
+                onPressed: () =>
+                    _showSnackBar(context, 'Track bus feature coming soon!'),
                 icon: const Icon(Icons.location_on),
                 label: const Text('Track Bus'),
                 style: ElevatedButton.styleFrom(
@@ -766,11 +846,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () => _showSnackBar(context, 'Payment feature coming soon!'),
+                onPressed: () =>
+                    _showSnackBar(context, 'Payment feature coming soon!'),
                 icon: const Icon(Icons.payment),
                 label: const Text('Pay Now'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _studentProfile!.isPaid ? Colors.grey : Colors.orange,
+                  backgroundColor: _studentProfile!.isPaid
+                      ? Colors.grey
+                      : Colors.orange,
                   foregroundColor: Colors.white,
                 ),
               ),
@@ -784,11 +867,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   Widget _buildInfoRow(String label, String value, IconData icon) {
     return Row(
       children: [
-        Icon(
-          icon, 
-          size: 18, 
-          color: Colors.grey.shade600,
-        ),
+        Icon(icon, size: 18, color: Colors.grey.shade600),
         const SizedBox(width: 10),
         Expanded(
           child: Column(
@@ -870,17 +949,14 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   void _showSnackBar(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.blue,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
   }
 
   Future<void> _signOut(BuildContext context) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.signOut();
-    
+
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),

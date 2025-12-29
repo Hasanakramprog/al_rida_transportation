@@ -17,7 +17,7 @@ class MyStudentsScreen extends StatefulWidget {
 class _MyStudentsScreenState extends State<MyStudentsScreen> {
   final DriverService _driverService = DriverService();
   final StudentProfileService _studentService = StudentProfileService();
-  
+
   List<StudentProfile> _myStudents = [];
   Driver? _driverProfile;
   bool _isLoading = true;
@@ -32,7 +32,7 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
   Future<void> _loadMyStudents() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
 
@@ -45,7 +45,7 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
 
       // Get all students
       final allStudents = await _studentService.getAllStudents();
-      
+
       // Filter students assigned to this driver and maintain the order from assignedStudentIds
       _myStudents = [];
       for (final studentId in _driverProfile!.assignedStudentIds) {
@@ -61,24 +61,26 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading students: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading students: $e')));
       }
     }
   }
 
   List<StudentProfile> get _filteredStudents {
     // First filter for active students only
-    final activeStudents = _myStudents.where((student) => student.isActive).toList();
-    
+    final activeStudents = _myStudents
+        .where((student) => student.isActive)
+        .toList();
+
     if (_searchQuery.isEmpty) return activeStudents;
-    
+
     return activeStudents.where((student) {
       final query = _searchQuery.toLowerCase();
       return student.fullName.toLowerCase().contains(query) ||
-             student.phoneNumber.contains(query) ||
-             student.university.toLowerCase().contains(query);
+          student.phoneNumber.contains(query) ||
+          student.university.toLowerCase().contains(query);
     }).toList();
   }
 
@@ -109,9 +111,9 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating order: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error updating order: $e')));
       }
       // Reload to restore original order
       _loadMyStudents();
@@ -157,10 +159,14 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                 backgroundColor: Colors.green,
                 radius: 30,
                 child: Text(
-                  _driverProfile?.fullName.isNotEmpty == true 
-                      ? _driverProfile!.fullName[0].toUpperCase() 
+                  _driverProfile?.fullName.isNotEmpty == true
+                      ? _driverProfile!.fullName[0].toUpperCase()
                       : 'D',
-                  style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -170,11 +176,17 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                   children: [
                     Text(
                       _driverProfile?.fullName ?? 'Driver',
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     Text(
                       'Zone ${_driverProfile?.zone ?? '-'} • ${_myStudents.length} ${_myStudents.length == 1 ? 'Student' : 'Students'}',
-                      style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey.shade700,
+                      ),
                     ),
                   ],
                 ),
@@ -192,12 +204,19 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: Colors.blue.shade700),
+                  Icon(
+                    Icons.info_outline,
+                    size: 16,
+                    color: Colors.blue.shade700,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'Long press and drag to reorder students',
-                      style: TextStyle(fontSize: 12, color: Colors.blue.shade700),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade700,
+                      ),
                     ),
                   ),
                 ],
@@ -216,9 +235,7 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
         decoration: InputDecoration(
           hintText: 'Search students by name, phone, or university',
           prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey.shade100,
         ),
@@ -277,7 +294,11 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
         itemCount: students.length,
         itemBuilder: (context, index) {
           final student = students[index];
-          return _buildStudentCard(student, index + 1, key: ValueKey(student.uid));
+          return _buildStudentCard(
+            student,
+            index + 1,
+            key: ValueKey(student.uid),
+          );
         },
       );
     }
@@ -302,7 +323,11 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
       },
       itemBuilder: (context, index) {
         final student = students[index];
-        return _buildStudentCard(student, index + 1, key: ValueKey(student.uid));
+        return _buildStudentCard(
+          student,
+          index + 1,
+          key: ValueKey(student.uid),
+        );
       },
     );
   }
@@ -321,11 +346,7 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
           child: Row(
             children: [
               // Drag handle icon
-              Icon(
-                Icons.drag_handle,
-                color: Colors.grey.shade400,
-                size: 24,
-              ),
+              Icon(Icons.drag_handle, color: Colors.grey.shade400, size: 24),
               const SizedBox(width: 12),
               // Number badge
               Container(
@@ -352,8 +373,14 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                 backgroundColor: Colors.blue.shade600,
                 radius: 28,
                 child: Text(
-                  student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  student.fullName.isNotEmpty
+                      ? student.fullName[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -372,23 +399,37 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.phone, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.phone,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           student.phoneNumber,
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.school, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.school,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             student.university,
-                            style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: Colors.grey.shade700,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -399,7 +440,10 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
               ),
               // Schedule badge
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.purple.shade50,
                   borderRadius: BorderRadius.circular(12),
@@ -459,8 +503,14 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                       backgroundColor: Colors.blue.shade600,
                       radius: 35,
                       child: Text(
-                        student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                        student.fullName.isNotEmpty
+                            ? student.fullName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -470,11 +520,17 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                         children: [
                           Text(
                             student.fullName,
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             'Student ID: ${student.uid.substring(0, 8)}...',
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade600,
+                            ),
                           ),
                         ],
                       ),
@@ -487,15 +543,34 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                 // Details
                 _buildDetailRow(Icons.phone, 'Phone', student.phoneNumber),
                 _buildDetailRow(Icons.school, 'University', student.university),
-                _buildDetailRow(Icons.location_city, 'City', '${student.city.name} (Zone ${student.city.zone})'),
-                _buildDetailRow(Icons.schedule, 'Schedule', student.scheduleSuffix.code),
-                _buildDetailRow(Icons.description, 'Description', student.scheduleSuffix.description),
-                _buildDetailRow(Icons.attach_money, 'Subscription', '\$${student.subscriptionCost.toStringAsFixed(2)} / ${student.subscriptionType.displayName}'),
+                _buildDetailRow(
+                  Icons.location_city,
+                  'City',
+                  '${student.city.name} (Zone ${student.city.zone})',
+                ),
+                _buildDetailRow(
+                  Icons.schedule,
+                  'Schedule',
+                  student.scheduleSuffix.code,
+                ),
+                _buildDetailRow(
+                  Icons.description,
+                  'Description',
+                  student.scheduleSuffix.description,
+                ),
+                _buildDetailRow(
+                  Icons.attach_money,
+                  'Subscription',
+                  '\$${student.subscriptionCost.toStringAsFixed(2)} / ${student.subscriptionType.displayName}',
+                ),
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
                 // Selected Days
-                const Text('Selected Days & Times:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Selected Days & Times:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 ...student.selectedDays.map((day) {
                   final timeSlot = student.dayTimeSlots[day];
@@ -506,13 +581,25 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                            Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
                             const SizedBox(width: 8),
-                            Text(day, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Text(
+                              day,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.blue.shade50,
                             borderRadius: BorderRadius.circular(12),
@@ -520,7 +607,11 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                           ),
                           child: Text(
                             timeSlot?.displayName ?? 'No time',
-                            style: TextStyle(color: Colors.blue.shade700, fontSize: 12, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: Colors.blue.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -583,7 +674,10 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),
@@ -596,16 +690,20 @@ class _MyStudentsScreenState extends State<MyStudentsScreen> {
   Future<void> _openWhatsApp(String phoneNumber) async {
     // Remove any non-digit characters from phone number
     final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
-    
+
     // WhatsApp URL scheme
     final whatsappUrl = Uri.parse('https://wa.me/$cleanNumber');
-    
+
     try {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open WhatsApp. Please make sure it is installed.')),
+          const SnackBar(
+            content: Text(
+              'Could not open WhatsApp. Please make sure it is installed.',
+            ),
+          ),
         );
       }
     }

@@ -44,7 +44,7 @@ class _DatabaseSetupScreenState extends State<DatabaseSetupScreen> {
 
     try {
       await DatabasePopulator.populateDatabase();
-      
+
       setState(() {
         _logs.addAll([
           '🔥 Firebase initialized successfully',
@@ -87,11 +87,7 @@ class _DatabaseSetupScreenState extends State<DatabaseSetupScreen> {
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
-                    const Icon(
-                      Icons.storage,
-                      size: 48,
-                      color: Colors.blue,
-                    ),
+                    const Icon(Icons.storage, size: 48, color: Colors.blue),
                     const SizedBox(height: 16),
                     const Text(
                       'Al Rida Transportation Database Setup',
@@ -111,11 +107,11 @@ class _DatabaseSetupScreenState extends State<DatabaseSetupScreen> {
                     Text(
                       _status,
                       style: TextStyle(
-                        color: _isLoading 
-                            ? Colors.orange 
+                        color: _isLoading
+                            ? Colors.orange
                             : _status.contains('Error')
-                                ? Colors.red
-                                : Colors.green,
+                            ? Colors.red
+                            : Colors.green,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -126,7 +122,7 @@ class _DatabaseSetupScreenState extends State<DatabaseSetupScreen> {
             const SizedBox(height: 16),
             ElevatedButton.icon(
               onPressed: _isLoading ? null : _populateDatabase,
-              icon: _isLoading 
+              icon: _isLoading
                   ? const SizedBox(
                       width: 16,
                       height: 16,
@@ -142,10 +138,7 @@ class _DatabaseSetupScreenState extends State<DatabaseSetupScreen> {
             if (_logs.isNotEmpty) ...[
               const Text(
                 'Logs:',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 8),
               Expanded(

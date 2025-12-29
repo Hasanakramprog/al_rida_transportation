@@ -19,9 +19,7 @@ import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(const MyApp());
 }
 
@@ -31,20 +29,13 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        Provider<AuthService>(
-          create: (_) => AuthService(),
-        ),
-      ],
+      providers: [Provider<AuthService>(create: (_) => AuthService())],
       child: MaterialApp(
         title: 'Al Rida Transportation',
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
-          appBarTheme: const AppBarTheme(
-            elevation: 2,
-            centerTitle: true,
-          ),
+          appBarTheme: const AppBarTheme(elevation: 2, centerTitle: true),
           cardTheme: CardThemeData(
             elevation: 4,
             shape: RoundedRectangleBorder(
@@ -65,14 +56,17 @@ class MyApp extends StatelessWidget {
         routes: {
           '/payment_history': (context) => const PaymentHistoryScreen(),
           '/admin/students': (context) => const StudentManagementScreen(),
-          '/admin/driver_assignment': (context) => const DriverAssignmentScreen(),
+          '/admin/driver_assignment': (context) =>
+              const DriverAssignmentScreen(),
           '/admin/trip-management': (context) => const TripManagementScreen(),
-          '/admin/subscriptions': (context) => const SubscriptionManagementScreen(),
+          '/admin/subscriptions': (context) =>
+              const SubscriptionManagementScreen(),
           '/admin/accounting': (context) => const AccountingScreen(),
           '/admin/transactions': (context) => const TransactionsListScreen(),
           '/driver/my-students': (context) => const MyStudentsScreen(),
           '/driver/trip-students': (context) => const TripStudentsScreen(),
-          '/admin/operating-payments': (context) => const OperatingPaymentsScreen(),
+          '/admin/operating-payments': (context) =>
+              const OperatingPaymentsScreen(),
         },
         onGenerateRoute: (settings) {
           if (settings.name == '/admin/student_detail') {

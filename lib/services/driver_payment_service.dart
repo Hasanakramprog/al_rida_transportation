@@ -34,7 +34,8 @@ class DriverPaymentService {
 
   // Get all transactions for a specific driver
   Future<List<DriverPaymentTransaction>> getDriverTransactions(
-      String driverId) async {
+    String driverId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection(_transactionsCollection)
@@ -91,15 +92,18 @@ class DriverPaymentService {
 
   // Watch driver transactions in real-time
   Stream<List<DriverPaymentTransaction>> watchDriverTransactions(
-      String driverId) {
+    String driverId,
+  ) {
     return _firestore
         .collection(_transactionsCollection)
         .where('driverId', isEqualTo: driverId)
         .orderBy('timestamp', descending: true)
         .snapshots()
-        .map((snapshot) => snapshot.docs
-            .map((doc) => DriverPaymentTransaction.fromFirestore(doc))
-            .toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => DriverPaymentTransaction.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   // Get transactions by currency
@@ -133,7 +137,10 @@ class DriverPaymentService {
       final snapshot = await _firestore
           .collection(_transactionsCollection)
           .where('driverId', isEqualTo: driverId)
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('timestamp', descending: true)
           .get();
@@ -149,9 +156,14 @@ class DriverPaymentService {
   // Calculate total for driver by currency
   Future<double> calculateDriverTotal(String driverId, String currency) async {
     try {
-      final transactions =
-          await getDriverTransactionsByCurrency(driverId, currency);
-      return transactions.fold<double>(0.0, (sum, transaction) => sum + transaction.amount);
+      final transactions = await getDriverTransactionsByCurrency(
+        driverId,
+        currency,
+      );
+      return transactions.fold<double>(
+        0.0,
+        (sum, transaction) => sum + transaction.amount,
+      );
     } catch (e) {
       throw Exception('Failed to calculate driver total: $e');
     }

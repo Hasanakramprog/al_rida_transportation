@@ -8,14 +8,15 @@ class OperatingPaymentsScreen extends StatefulWidget {
   const OperatingPaymentsScreen({super.key});
 
   @override
-  State<OperatingPaymentsScreen> createState() => _OperatingPaymentsScreenState();
+  State<OperatingPaymentsScreen> createState() =>
+      _OperatingPaymentsScreenState();
 }
 
 class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
   final OperatingPaymentService _service = OperatingPaymentService();
   final AuthService _authService = AuthService();
   final AccountingService _accountingService = AccountingService();
-  
+
   List<OperatingPayment> _payments = [];
   List<OperatingPayment> _filteredPayments = [];
   bool _isLoading = false;
@@ -25,11 +26,11 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _notesController = TextEditingController();
   final TextEditingController _searchController = TextEditingController();
-  
+
   String _selectedPaymentType = 'fuel';
   String _selectedCurrency = 'USD';
   String? _selectedDriverId;
-  
+
   // Filter fields
   String _filterPaymentType = 'all';
   String _filterCurrency = 'all';
@@ -65,27 +66,29 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
 
   void _applyFilters() {
     List<OperatingPayment> filtered = List.from(_payments);
-    
+
     // Apply payment type filter
     if (_filterPaymentType != 'all') {
-      filtered = filtered.where((p) => p.paymentType == _filterPaymentType).toList();
+      filtered = filtered
+          .where((p) => p.paymentType == _filterPaymentType)
+          .toList();
     }
-    
+
     // Apply currency filter
     if (_filterCurrency != 'all') {
       filtered = filtered.where((p) => p.currency == _filterCurrency).toList();
     }
-    
+
     // Apply search filter
     if (_searchController.text.isNotEmpty) {
       final searchLower = _searchController.text.toLowerCase();
       filtered = filtered.where((p) {
         return p.driverName.toLowerCase().contains(searchLower) ||
-               p.paymentTypeLabel.toLowerCase().contains(searchLower) ||
-               (p.notes?.toLowerCase().contains(searchLower) ?? false);
+            p.paymentTypeLabel.toLowerCase().contains(searchLower) ||
+            (p.notes?.toLowerCase().contains(searchLower) ?? false);
       }).toList();
     }
-    
+
     setState(() => _filteredPayments = filtered);
   }
 
@@ -98,14 +101,16 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
     try {
       final amount = double.parse(_amountController.text);
       final currentUser = _authService.currentUser;
-      
+
       if (currentUser == null) {
         _showError('User not authenticated');
         return;
       }
 
       await _service.addOperatingPayment(
-        driverId: _selectedDriverId ?? 'driver_${DateTime.now().millisecondsSinceEpoch}',
+        driverId:
+            _selectedDriverId ??
+            'driver_${DateTime.now().millisecondsSinceEpoch}',
         driverName: _driverNameController.text,
         paymentType: _selectedPaymentType,
         amount: amount,
@@ -116,15 +121,20 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
 
       // Record negative transaction in payment_transactions
       await _accountingService.addTransaction(
-        studentId: _selectedDriverId ?? 'driver_${DateTime.now().millisecondsSinceEpoch}',
+        studentId:
+            _selectedDriverId ??
+            'driver_${DateTime.now().millisecondsSinceEpoch}',
         studentName: _driverNameController.text,
         amount: -amount,
-        paymentType: 'Operating Payment - ${_selectedPaymentType[0].toUpperCase()}${_selectedPaymentType.substring(1)}',
+        paymentType:
+            'Operating Payment - ${_selectedPaymentType[0].toUpperCase()}${_selectedPaymentType.substring(1)}',
         subscriptionMonth: DateTime.now().month,
         subscriptionYear: DateTime.now().year,
         adminId: currentUser.uid,
         currency: _selectedCurrency,
-        notes: _notesController.text.isNotEmpty ? _notesController.text : 'Operating payment',
+        notes: _notesController.text.isNotEmpty
+            ? _notesController.text
+            : 'Operating payment',
       );
 
       _showSuccess('Payment added successfully');
@@ -170,7 +180,10 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
                 ),
                 items: const [
                   DropdownMenuItem(value: 'fuel', child: Text('Fuel')),
-                  DropdownMenuItem(value: 'maintenance', child: Text('Maintenance')),
+                  DropdownMenuItem(
+                    value: 'maintenance',
+                    child: Text('Maintenance'),
+                  ),
                   DropdownMenuItem(value: 'salary', child: Text('Salary')),
                 ],
                 onChanged: (value) {
@@ -297,7 +310,10 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                const Text('Type: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Type: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(width: 8),
                 _buildFilterChip('All', 'all', _filterPaymentType, (value) {
                   setState(() => _filterPaymentType = value);
@@ -309,17 +325,27 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
                   _applyFilters();
                 }),
                 const SizedBox(width: 8),
-                _buildFilterChip('Maintenance', 'maintenance', _filterPaymentType, (value) {
-                  setState(() => _filterPaymentType = value);
-                  _applyFilters();
-                }),
+                _buildFilterChip(
+                  'Maintenance',
+                  'maintenance',
+                  _filterPaymentType,
+                  (value) {
+                    setState(() => _filterPaymentType = value);
+                    _applyFilters();
+                  },
+                ),
                 const SizedBox(width: 8),
-                _buildFilterChip('Salary', 'salary', _filterPaymentType, (value) {
+                _buildFilterChip('Salary', 'salary', _filterPaymentType, (
+                  value,
+                ) {
                   setState(() => _filterPaymentType = value);
                   _applyFilters();
                 }),
                 const SizedBox(width: 24),
-                const Text('Currency: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text(
+                  'Currency: ',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(width: 8),
                 _buildFilterChip('All', 'all', _filterCurrency, (value) {
                   setState(() => _filterCurrency = value);
@@ -347,12 +373,11 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
               children: [
                 Text(
                   'Showing ${_filteredPayments.length} of ${_payments.length} payments',
-                  style: TextStyle(
-                    fontSize: 13,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
                 ),
-                if (_filterPaymentType != 'all' || _filterCurrency != 'all' || _searchController.text.isNotEmpty)
+                if (_filterPaymentType != 'all' ||
+                    _filterCurrency != 'all' ||
+                    _searchController.text.isNotEmpty)
                   TextButton.icon(
                     onPressed: () {
                       setState(() {
@@ -376,49 +401,51 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredPayments.isEmpty
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              _payments.isEmpty ? Icons.directions_bus : Icons.search_off,
-                              size: 64,
-                              color: Colors.grey.shade400,
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              _payments.isEmpty
-                                  ? 'No payments recorded'
-                                  : 'No payments match your filters',
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            if (_payments.isNotEmpty) const SizedBox(height: 8),
-                            if (_payments.isNotEmpty)
-                              TextButton(
-                                onPressed: () {
-                                  setState(() {
-                                    _filterPaymentType = 'all';
-                                    _filterCurrency = 'all';
-                                    _searchController.clear();
-                                  });
-                                  _applyFilters();
-                                },
-                                child: const Text('Clear all filters'),
-                              ),
-                          ],
+                ? Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          _payments.isEmpty
+                              ? Icons.directions_bus
+                              : Icons.search_off,
+                          size: 64,
+                          color: Colors.grey.shade400,
                         ),
-                      )
-                    : ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: _filteredPayments.length,
-                        itemBuilder: (context, index) {
-                          final payment = _filteredPayments[index];
-                          return _buildPaymentCard(payment);
-                        },
-                      ),
+                        const SizedBox(height: 16),
+                        Text(
+                          _payments.isEmpty
+                              ? 'No payments recorded'
+                              : 'No payments match your filters',
+                          style: TextStyle(
+                            fontSize: 18,
+                            color: Colors.grey.shade600,
+                          ),
+                        ),
+                        if (_payments.isNotEmpty) const SizedBox(height: 8),
+                        if (_payments.isNotEmpty)
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _filterPaymentType = 'all';
+                                _filterCurrency = 'all';
+                                _searchController.clear();
+                              });
+                              _applyFilters();
+                            },
+                            child: const Text('Clear all filters'),
+                          ),
+                      ],
+                    ),
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: _filteredPayments.length,
+                    itemBuilder: (context, index) {
+                      final payment = _filteredPayments[index];
+                      return _buildPaymentCard(payment);
+                    },
+                  ),
           ),
         ],
       ),
@@ -432,7 +459,7 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
 
   Widget _buildPaymentCard(OperatingPayment payment) {
     final typeColor = _getPaymentTypeColor(payment.paymentType);
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -453,10 +480,7 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
         ),
         title: Text(
           payment.driverName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -464,18 +488,12 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
             const SizedBox(height: 4),
             Text(
               payment.paymentTypeLabel,
-              style: TextStyle(
-                fontSize: 13,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
             ),
             const SizedBox(height: 2),
             Text(
               payment.formattedDate,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade500,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
             ),
           ],
         ),
@@ -539,7 +557,12 @@ class _OperatingPaymentsScreenState extends State<OperatingPaymentsScreen> {
     }
   }
 
-  Widget _buildFilterChip(String label, String value, String currentValue, Function(String) onSelected) {
+  Widget _buildFilterChip(
+    String label,
+    String value,
+    String currentValue,
+    Function(String) onSelected,
+  ) {
     final isSelected = currentValue == value;
     return FilterChip(
       label: Text(label),

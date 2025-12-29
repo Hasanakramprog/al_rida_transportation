@@ -9,10 +9,7 @@ import '../home/student_home.dart';
 class WeekCalendarScreen extends StatefulWidget {
   final StudentProfile studentProfile;
 
-  const WeekCalendarScreen({
-    super.key,
-    required this.studentProfile,
-  });
+  const WeekCalendarScreen({super.key, required this.studentProfile});
 
   @override
   State<WeekCalendarScreen> createState() => _WeekCalendarScreenState();
@@ -20,14 +17,14 @@ class WeekCalendarScreen extends StatefulWidget {
 
 class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
   final _profileService = StudentProfileService();
-  
+
   final List<String> _weekDays = [
     'Monday',
-    'Tuesday', 
+    'Tuesday',
     'Wednesday',
     'Thursday',
     'Friday',
-    'Saturday'
+    'Saturday',
   ];
 
   Set<String> _selectedDays = {};
@@ -61,7 +58,9 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
           // Show message that max days reached
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('You can only select $_maxSelectableDays ${_maxSelectableDays == 1 ? 'day' : 'days'} per week'),
+              content: Text(
+                'You can only select $_maxSelectableDays ${_maxSelectableDays == 1 ? 'day' : 'days'} per week',
+              ),
               backgroundColor: Colors.orange,
             ),
           );
@@ -105,7 +104,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
     try {
       final authService = Provider.of<AuthService>(context, listen: false);
       final user = authService.currentUser;
-      
+
       if (user == null) {
         throw 'User not found';
       }
@@ -121,7 +120,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
 
       // Save only the updated student profile
       await _profileService.saveStudentProfile(updatedProfile);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -129,7 +128,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Navigate to student home
         Navigator.of(context).pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => const StudentHomeScreen()),
@@ -167,11 +166,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // Header
-              const Icon(
-                Icons.calendar_month,
-                size: 80,
-                color: Colors.blue,
-              ),
+              const Icon(Icons.calendar_month, size: 80, color: Colors.blue),
               const SizedBox(height: 16),
               const Text(
                 'Choose Your Bus Days & Times',
@@ -186,20 +181,14 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
               Text(
                 'Select up to $_maxSelectableDays ${_maxSelectableDays == 1 ? 'day' : 'days'} per week and choose a time for each day',
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 16, color: Colors.grey),
               ),
               const SizedBox(height: 32),
 
               // Days Selection
               const Text(
                 'Select Days:',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               const SizedBox(height: 16),
               _buildDaySelectionGrid(),
@@ -209,10 +198,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
               if (_selectedDays.isNotEmpty) ...[
                 const Text(
                   'Select Time for Each Day:',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
                 _buildTimeSlotSelection(),
@@ -239,11 +225,23 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
                       ),
                     ),
                     const SizedBox(height: 12),
-                    _buildInfoRow('University', widget.studentProfile.university),
+                    _buildInfoRow(
+                      'University',
+                      widget.studentProfile.university,
+                    ),
                     _buildInfoRow('Phone', widget.studentProfile.phoneNumber),
-                    _buildInfoRow('Schedule', '${widget.studentProfile.scheduleSuffix.displayName} (${widget.studentProfile.scheduleSuffix.code})'),
-                    _buildInfoRow('City', '${widget.studentProfile.city.name} (Zone ${widget.studentProfile.city.zone})'),
-                    _buildInfoRow('Subscription', '${widget.studentProfile.subscriptionType.name.toUpperCase()} - $_costDescription'),
+                    _buildInfoRow(
+                      'Schedule',
+                      '${widget.studentProfile.scheduleSuffix.displayName} (${widget.studentProfile.scheduleSuffix.code})',
+                    ),
+                    _buildInfoRow(
+                      'City',
+                      '${widget.studentProfile.city.name} (Zone ${widget.studentProfile.city.zone})',
+                    ),
+                    _buildInfoRow(
+                      'Subscription',
+                      '${widget.studentProfile.subscriptionType.name.toUpperCase()} - $_costDescription',
+                    ),
                   ],
                 ),
               ),
@@ -277,7 +275,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
               //       onTap: () => _onDayToggled(day),
               //       child: Container(
               //         decoration: BoxDecoration(
-              //           color: isSelected 
+              //           color: isSelected
               //               ? Colors.blue
               //               : canSelect || isSelected
               //                   ? Colors.white
@@ -296,7 +294,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
               //           child: Text(
               //             day,
               //             style: TextStyle(
-              //               color: isSelected 
+              //               color: isSelected
               //                   ? Colors.white
               //                   : canSelect || isSelected
               //                       ? Colors.blue
@@ -347,16 +345,18 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
                 const SizedBox(height: 24),
               ],
 
-
-
               // Complete Booking Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isLoading || _selectedDays.isEmpty || 
-                      !_selectedDays.every((day) => _dayTimeSlots.containsKey(day))
-                      ? null 
+                  onPressed:
+                      _isLoading ||
+                          _selectedDays.isEmpty ||
+                          !_selectedDays.every(
+                            (day) => _dayTimeSlots.containsKey(day),
+                          )
+                      ? null
                       : _completeBooking,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.green,
@@ -366,7 +366,10 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
                       ? const CircularProgressIndicator(color: Colors.white)
                       : const Text(
                           'Complete Profile',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
@@ -406,7 +409,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
                   ],
                 ),
               ),
-              
+
               // Bottom padding for safe scrolling
               const SizedBox(height: 24),
             ],
@@ -462,7 +465,7 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
       itemBuilder: (context, index) {
         final day = _weekDays[index];
         final isSelected = _selectedDays.contains(day);
-        
+
         return InkWell(
           onTap: () => _onDayToggled(day),
           borderRadius: BorderRadius.circular(8),
@@ -529,7 +532,9 @@ class _WeekCalendarScreenState extends State<WeekCalendarScreen> {
                             color: isSelected ? Colors.blue : Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: isSelected ? Colors.blue : Colors.grey.shade300,
+                              color: isSelected
+                                  ? Colors.blue
+                                  : Colors.grey.shade300,
                             ),
                           ),
                           child: Text(

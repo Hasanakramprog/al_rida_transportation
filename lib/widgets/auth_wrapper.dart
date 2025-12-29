@@ -21,9 +21,7 @@ class AuthWrapper extends StatelessWidget {
         // Show loading while checking authentication state
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -45,14 +43,15 @@ class RoleBasedHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: Provider.of<AuthService>(context, listen: false).getCurrentAppUser(),
+      future: Provider.of<AuthService>(
+        context,
+        listen: false,
+      ).getCurrentAppUser(),
       builder: (context, snapshot) {
         // Show loading while fetching user data
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -84,7 +83,7 @@ class StudentProfileChecker extends StatelessWidget {
   Widget build(BuildContext context) {
     final authService = Provider.of<AuthService>(context, listen: false);
     final user = authService.currentUser;
-    
+
     if (user == null) {
       return const LoginScreen();
     }
@@ -110,7 +109,7 @@ class StudentProfileChecker extends StatelessWidget {
 
         // Check if profile is completed
         final hasProfile = snapshot.data ?? false;
-        
+
         if (hasProfile) {
           // Profile exists, go to student home
           return const StudentHomeScreen();

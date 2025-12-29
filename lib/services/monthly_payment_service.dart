@@ -5,18 +5,24 @@ import 'accounting_service.dart';
 class MonthlyPaymentService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final AccountingService _accountingService = AccountingService();
-  
+
   static const String _paymentsCollection = 'monthly_payments';
 
   // ADMIN ONLY: Create payment records for a student for entire year
-  Future<void> createYearlyPaymentRecords(String studentUid, double monthlyAmount, int year) async {
+  Future<void> createYearlyPaymentRecords(
+    String studentUid,
+    double monthlyAmount,
+    int year,
+  ) async {
     try {
       final batch = _firestore.batch();
-      
+
       for (int month = 1; month <= 12; month++) {
         final paymentId = '${studentUid}_${year}_$month';
-        final docRef = _firestore.collection(_paymentsCollection).doc(paymentId);
-        
+        final docRef = _firestore
+            .collection(_paymentsCollection)
+            .doc(paymentId);
+
         final payment = MonthlyPayment(
           id: paymentId,
           studentUid: studentUid,
@@ -26,10 +32,10 @@ class MonthlyPaymentService {
           isPaid: false,
           createdAt: DateTime.now(),
         );
-        
+
         batch.set(docRef, payment.toMap());
       }
-      
+
       await batch.commit();
     } catch (e) {
       throw 'Error creating yearly payment records: $e';
@@ -48,24 +54,26 @@ class MonthlyPaymentService {
     try {
       final paymentId = '${studentUid}_${year}_$month';
       final docRef = _firestore.collection(_paymentsCollection).doc(paymentId);
-      
+
       // Get current payment record
       final doc = await docRef.get();
       if (!doc.exists) {
         throw 'Payment record not found';
       }
-      
+
       final currentPayment = MonthlyPayment.fromFirestore(doc);
       final newPaidAmount = currentPayment.paidAmount + paymentAmount;
       final newRemainingAmount = currentPayment.monthlyAmount - newPaidAmount;
       final isFullyPaid = newRemainingAmount <= 0;
-      
+
       // Update payment record
       await docRef.update({
         'paidAmount': newPaidAmount,
         'remainingAmount': newRemainingAmount >= 0 ? newRemainingAmount : 0,
         'isPaid': isFullyPaid,
-        'paidAt': isFullyPaid ? Timestamp.fromDate(DateTime.now()) : currentPayment.paidAt,
+        'paidAt': isFullyPaid
+            ? Timestamp.fromDate(DateTime.now())
+            : currentPayment.paidAt,
         'paidBy': adminUid,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
@@ -73,7 +81,7 @@ class MonthlyPaymentService {
       // Create accounting transaction
       // Determine payment type based on whether this completes the payment
       String paymentType = isFullyPaid ? 'full' : 'partial';
-      
+
       await _accountingService.addTransaction(
         studentId: studentUid,
         studentName: studentName ?? 'Unknown Student',
@@ -83,8 +91,8 @@ class MonthlyPaymentService {
         subscriptionYear: year,
         adminId: adminUid,
         currency: 'USD', // TODO: Get from student profile or payment settings
-        notes: isFullyPaid 
-            ? 'Full payment completed' 
+        notes: isFullyPaid
+            ? 'Full payment completed'
             : 'Partial payment (\$${newPaidAmount.toStringAsFixed(0)} of \$${currentPayment.monthlyAmount.toStringAsFixed(0)})',
       );
     } catch (e) {
@@ -103,16 +111,16 @@ class MonthlyPaymentService {
     try {
       final paymentId = '${studentUid}_${year}_$month';
       final docRef = _firestore.collection(_paymentsCollection).doc(paymentId);
-      
+
       // Get current payment record
       final doc = await docRef.get();
       if (!doc.exists) {
         throw 'Payment record not found';
       }
-      
+
       final currentPayment = MonthlyPayment.fromFirestore(doc);
       final remainingAmount = currentPayment.remainingAmount;
-      
+
       // Update payment record
       await docRef.update({
         'paidAmount': currentPayment.monthlyAmount,
@@ -151,8 +159,11 @@ class MonthlyPaymentService {
   }) async {
     try {
       final paymentId = '${studentUid}_${year}_$month';
-      final doc = await _firestore.collection(_paymentsCollection).doc(paymentId).get();
-      
+      final doc = await _firestore
+          .collection(_paymentsCollection)
+          .doc(paymentId)
+          .get();
+
       if (doc.exists) {
         return MonthlyPayment.fromFirestore(doc);
       }
@@ -171,7 +182,7 @@ class MonthlyPaymentService {
           .where('month', isEqualTo: month)
           .orderBy('studentUid')
           .get();
-      
+
       return snapshot.docs
           .map((doc) => MonthlyPayment.fromFirestore(doc))
           .toList();
@@ -181,18 +192,21 @@ class MonthlyPaymentService {
   }
 
   // ADMIN ONLY: Get all payments for a student
-  Future<List<MonthlyPayment>> getStudentPayments(String studentUid, {int? year}) async {
+  Future<List<MonthlyPayment>> getStudentPayments(
+    String studentUid, {
+    int? year,
+  }) async {
     try {
       Query query = _firestore
           .collection(_paymentsCollection)
           .where('studentUid', isEqualTo: studentUid);
-      
+
       if (year != null) {
         query = query.where('year', isEqualTo: year);
       }
-      
+
       final snapshot = await query.orderBy('year').orderBy('month').get();
-      
+
       return snapshot.docs
           .map((doc) => MonthlyPayment.fromFirestore(doc))
           .toList();
@@ -206,12 +220,12 @@ class MonthlyPaymentService {
     try {
       final now = DateTime.now();
       final paymentId = '${studentUid}_${now.year}_${now.month}';
-      
+
       final doc = await _firestore
           .collection(_paymentsCollection)
           .doc(paymentId)
           .get();
-      
+
       if (doc.exists) {
         return MonthlyPayment.fromFirestore(doc);
       }
@@ -222,7 +236,10 @@ class MonthlyPaymentService {
   }
 
   // Student view: Get their payment history
-  Future<List<MonthlyPayment>> getMyPaymentHistory(String studentUid, {int limit = 12}) async {
+  Future<List<MonthlyPayment>> getMyPaymentHistory(
+    String studentUid, {
+    int limit = 12,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection(_paymentsCollection)
@@ -231,7 +248,7 @@ class MonthlyPaymentService {
           .orderBy('month', descending: true)
           .limit(limit)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => MonthlyPayment.fromFirestore(doc))
           .toList();
@@ -241,22 +258,27 @@ class MonthlyPaymentService {
   }
 
   // ADMIN ONLY: Update monthly amount for all future payments of a student
-  Future<void> updateFuturePaymentAmounts(String studentUid, double newMonthlyAmount) async {
+  Future<void> updateFuturePaymentAmounts(
+    String studentUid,
+    double newMonthlyAmount,
+  ) async {
     try {
       final now = DateTime.now();
       final batch = _firestore.batch();
-      
+
       // Update current month and future months
       for (int month = now.month; month <= 12; month++) {
         final paymentId = '${studentUid}_${now.year}_$month';
-        final docRef = _firestore.collection(_paymentsCollection).doc(paymentId);
-        
+        final docRef = _firestore
+            .collection(_paymentsCollection)
+            .doc(paymentId);
+
         batch.update(docRef, {
           'monthlyAmount': newMonthlyAmount,
           'updatedAt': Timestamp.fromDate(DateTime.now()),
         });
       }
-      
+
       await batch.commit();
     } catch (e) {
       throw 'Error updating future payment amounts: $e';
@@ -273,16 +295,16 @@ class MonthlyPaymentService {
           .where('year', isEqualTo: now.year)
           .where('month', isLessThanOrEqualTo: now.month)
           .get();
-      
+
       double totalUnpaid = 0;
       int unpaidCount = 0;
-      
+
       for (final doc in snapshot.docs) {
         final payment = MonthlyPayment.fromFirestore(doc);
         totalUnpaid += payment.monthlyAmount;
         unpaidCount++;
       }
-      
+
       return {
         'totalUnpaid': totalUnpaid,
         'unpaidCount': unpaidCount,

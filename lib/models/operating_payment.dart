@@ -57,7 +57,8 @@ class OperatingPayment {
   }
 
   // Format display
-  String get formattedAmount => '${currency == 'USD' ? '\$' : '₾'}${amount.toStringAsFixed(0)}';
+  String get formattedAmount =>
+      '${currency == 'USD' ? '\$' : '₾'}${amount.toStringAsFixed(0)}';
 
   String get formattedDate {
     return '${timestamp.day}/${timestamp.month}/${timestamp.year} ${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}';

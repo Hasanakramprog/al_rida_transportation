@@ -11,16 +11,17 @@ class TripManagementScreen extends StatefulWidget {
 
 class _TripManagementScreenState extends State<TripManagementScreen> {
   final DriverService _driverService = DriverService();
-  
+
   List<Driver> _allDrivers = [];
-  Map<String, Map<String, String>> _allTripAssignments = {}; // {day: {tripType: driverId}}
+  Map<String, Map<String, String>> _allTripAssignments =
+      {}; // {day: {tripType: driverId}}
   bool _isLoading = true;
-  
+
   // Form state
   Driver? _selectedDriver;
   String? _selectedDay;
   final Set<String> _selectedTrips = {};
-  
+
   final List<String> _days = [
     'Saturday',
     'Sunday',
@@ -30,7 +31,7 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
     'Thursday',
     'Friday',
   ];
-  
+
   final List<Map<String, String>> _trips = [
     {'id': 'trip1', 'name': 'Trip 1', 'time': '1:00 PM'},
     {'id': 'trip2', 'name': 'Trip 2', 'time': '2:00 PM'},
@@ -46,10 +47,10 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
   Future<void> _loadData() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final drivers = await _driverService.getAllDrivers();
       final assignments = await _driverService.getAllTripAssignments();
-      
+
       setState(() {
         _allDrivers = drivers.where((d) => d.isActive).toList();
         _allTripAssignments = assignments;
@@ -58,9 +59,9 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading data: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading data: $e')));
       }
     }
   }
@@ -84,9 +85,13 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
   }
 
   Future<void> _assignTrips() async {
-    if (_selectedDriver == null || _selectedDay == null || _selectedTrips.isEmpty) {
+    if (_selectedDriver == null ||
+        _selectedDay == null ||
+        _selectedTrips.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select driver, day, and at least one trip')),
+        const SnackBar(
+          content: Text('Please select driver, day, and at least one trip'),
+        ),
       );
       return;
     }
@@ -107,22 +112,22 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
             backgroundColor: Colors.green,
           ),
         );
-        
+
         // Reset form
         setState(() {
           _selectedDriver = null;
           _selectedDay = null;
           _selectedTrips.clear();
         });
-        
+
         // Reload data
         _loadData();
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error assigning trips: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error assigning trips: $e')));
       }
     }
   }
@@ -179,16 +184,21 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
               ],
             ),
             const SizedBox(height: 20),
-            
+
             // Driver Selector
-            const Text('Select Driver', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Select Driver',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             DropdownButtonFormField<Driver>(
               value: _selectedDriver,
               decoration: InputDecoration(
                 hintText: 'Choose a driver',
                 prefixIcon: const Icon(Icons.person),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
               ),
@@ -206,24 +216,26 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
               },
             ),
             const SizedBox(height: 20),
-            
+
             // Day Selector
-            const Text('Select Day', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Select Day',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
               value: _selectedDay,
               decoration: InputDecoration(
                 hintText: 'Choose a day',
                 prefixIcon: const Icon(Icons.calendar_today),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 filled: true,
                 fillColor: Colors.grey.shade50,
               ),
               items: _days.map((day) {
-                return DropdownMenuItem(
-                  value: day,
-                  child: Text(day),
-                );
+                return DropdownMenuItem(value: day, child: Text(day));
               }).toList(),
               onChanged: (day) {
                 setState(() {
@@ -233,16 +245,27 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
               },
             ),
             const SizedBox(height: 20),
-            
+
             // Trip Selectors
-            const Text('Select Trips', style: TextStyle(fontWeight: FontWeight.bold)),
+            const Text(
+              'Select Trips',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 8),
             if (_selectedDay != null && _selectedDriver != null)
               ..._trips.map((trip) {
-                final isAvailable = _isTripAvailable(_selectedDay!, trip['id']!);
-                final assignedDriver = _getTripDriver(_selectedDay!, trip['id']!);
-                final driverInfo = assignedDriver != null ? _getDriverById(assignedDriver) : null;
-                
+                final isAvailable = _isTripAvailable(
+                  _selectedDay!,
+                  trip['id']!,
+                );
+                final assignedDriver = _getTripDriver(
+                  _selectedDay!,
+                  trip['id']!,
+                );
+                final driverInfo = assignedDriver != null
+                    ? _getDriverById(assignedDriver)
+                    : null;
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: CheckboxListTile(
@@ -268,7 +291,10 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
                     subtitle: !isAvailable && driverInfo != null
                         ? Text(
                             'Currently assigned to ${driverInfo.fullName}',
-                            style: const TextStyle(color: Colors.red, fontSize: 12),
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontSize: 12,
+                            ),
                           )
                         : null,
                     secondary: Icon(
@@ -304,12 +330,13 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
                 ),
               ),
             const SizedBox(height: 20),
-            
+
             // Assign Button
             SizedBox(
               width: double.infinity,
               child: ElevatedButton.icon(
-                onPressed: _selectedDriver != null &&
+                onPressed:
+                    _selectedDriver != null &&
                         _selectedDay != null &&
                         _selectedTrips.isNotEmpty
                     ? _assignTrips
@@ -320,7 +347,10 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
                   backgroundColor: Colors.deepPurple,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
-                  textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  textStyle: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
             ),
@@ -352,7 +382,7 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
 
   Widget _buildDayAssignments(String day) {
     final dayAssignments = _allTripAssignments[day] ?? {};
-    
+
     if (dayAssignments.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -364,13 +394,13 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
           backgroundColor: Colors.deepPurple,
           child: Text(
             day.substring(0, 2),
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
-        title: Text(
-          day,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
+        title: Text(day, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text('${dayAssignments.length} trip(s) assigned'),
         children: [
           Padding(
@@ -378,8 +408,10 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
             child: Column(
               children: _trips.map((trip) {
                 final driverId = dayAssignments[trip['id']];
-                final driver = driverId != null ? _getDriverById(driverId) : null;
-                
+                final driver = driverId != null
+                    ? _getDriverById(driverId)
+                    : null;
+
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
@@ -389,16 +421,24 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
                     ),
                     title: Text('${trip['name']} - ${trip['time']}'),
                     subtitle: driver != null
-                        ? Text('Assigned to: ${driver.fullName} (Zone ${driver.zone})')
-                        : const Text('Not assigned', style: TextStyle(color: Colors.grey)),
+                        ? Text(
+                            'Assigned to: ${driver.fullName} (Zone ${driver.zone})',
+                          )
+                        : const Text(
+                            'Not assigned',
+                            style: TextStyle(color: Colors.grey),
+                          ),
                     trailing: driver != null
                         ? IconButton(
                             icon: const Icon(Icons.delete, color: Colors.red),
-                            onPressed: () => _confirmRemoveTrip(day, trip['id']!, driver),
+                            onPressed: () =>
+                                _confirmRemoveTrip(day, trip['id']!, driver),
                             tooltip: 'Remove assignment',
                           )
                         : null,
-                    tileColor: driver != null ? Colors.green.shade50 : Colors.grey.shade50,
+                    tileColor: driver != null
+                        ? Colors.green.shade50
+                        : Colors.grey.shade50,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -412,7 +452,11 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
     );
   }
 
-  Future<void> _confirmRemoveTrip(String day, String tripId, Driver driver) async {
+  Future<void> _confirmRemoveTrip(
+    String day,
+    String tripId,
+    Driver driver,
+  ) async {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -455,9 +499,9 @@ class _TripManagementScreenState extends State<TripManagementScreen> {
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error removing trip: $e')),
-          );
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error removing trip: $e')));
         }
       }
     }

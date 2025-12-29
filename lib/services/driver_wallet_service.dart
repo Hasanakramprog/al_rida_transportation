@@ -24,7 +24,10 @@ class DriverWalletService {
   // Get driver wallet
   Future<DriverWallet?> getDriverWallet(String driverId) async {
     try {
-      final doc = await _firestore.collection(_walletsCollection).doc(driverId).get();
+      final doc = await _firestore
+          .collection(_walletsCollection)
+          .doc(driverId)
+          .get();
 
       if (!doc.exists) {
         return null;
@@ -37,7 +40,11 @@ class DriverWalletService {
   }
 
   // Add amount to driver wallet (for operating payments)
-  Future<void> addToDriverWallet(String driverId, double amount, String currency) async {
+  Future<void> addToDriverWallet(
+    String driverId,
+    double amount,
+    String currency,
+  ) async {
     try {
       final docRef = _firestore.collection(_walletsCollection).doc(driverId);
 
@@ -64,7 +71,11 @@ class DriverWalletService {
   }
 
   // Subtract amount from driver wallet (for payments out)
-  Future<void> subtractFromDriverWallet(String driverId, double amount, String currency) async {
+  Future<void> subtractFromDriverWallet(
+    String driverId,
+    double amount,
+    String currency,
+  ) async {
     try {
       final docRef = _firestore.collection(_walletsCollection).doc(driverId);
 
@@ -88,12 +99,19 @@ class DriverWalletService {
 
   // Watch driver wallet in real-time
   Stream<DriverWallet?> watchDriverWallet(String driverId) {
-    return _firestore.collection(_walletsCollection).doc(driverId).snapshots().map((doc) {
-      if (!doc.exists) {
-        return null;
-      }
-      return DriverWallet.fromMap(doc.id, doc.data() as Map<String, dynamic>);
-    });
+    return _firestore
+        .collection(_walletsCollection)
+        .doc(driverId)
+        .snapshots()
+        .map((doc) {
+          if (!doc.exists) {
+            return null;
+          }
+          return DriverWallet.fromMap(
+            doc.id,
+            doc.data() as Map<String, dynamic>,
+          );
+        });
   }
 
   // Get all driver wallets

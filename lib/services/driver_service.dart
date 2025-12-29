@@ -55,7 +55,9 @@ class DriverService {
   // Create new driver
   Future<String> createDriver(Driver driver) async {
     try {
-      final docRef = await _firestore.collection(_driversCollection).add(driver.toMap());
+      final docRef = await _firestore
+          .collection(_driversCollection)
+          .add(driver.toMap());
       return docRef.id;
     } catch (e) {
       throw 'Error creating driver: $e';
@@ -92,27 +94,30 @@ class DriverService {
       final batch = _firestore.batch();
 
       // Get current driver data
-      final driverDoc = await _firestore.collection(_driversCollection).doc(driverId).get();
+      final driverDoc = await _firestore
+          .collection(_driversCollection)
+          .doc(driverId)
+          .get();
       final driver = Driver.fromFirestore(driverDoc);
 
       // Get all drivers to check for existing assignments
       final allDrivers = await getAllDrivers();
-      
+
       // Remove students from their previous drivers
       for (final otherDriver in allDrivers) {
         if (otherDriver.uid == driverId) continue;
-        
+
         // Find students that are currently assigned to this driver
         final studentsToRemove = otherDriver.assignedStudentIds
             .where((sid) => studentIds.contains(sid))
             .toList();
-        
+
         if (studentsToRemove.isNotEmpty) {
           // Remove these students from the old driver
           final updatedOldDriverStudents = otherDriver.assignedStudentIds
               .where((sid) => !studentIds.contains(sid))
               .toList();
-          
+
           batch.update(
             _firestore.collection(_driversCollection).doc(otherDriver.uid),
             {
@@ -124,25 +129,22 @@ class DriverService {
       }
 
       // Combine existing and new student IDs, remove duplicates
-      final updatedStudentIds = {...driver.assignedStudentIds, ...studentIds}.toList();
+      final updatedStudentIds = {
+        ...driver.assignedStudentIds,
+        ...studentIds,
+      }.toList();
 
       // Update driver document
-      batch.update(
-        _firestore.collection(_driversCollection).doc(driverId),
-        {
-          'assignedStudentIds': updatedStudentIds,
-          'updatedAt': Timestamp.now(),
-        },
-      );
+      batch.update(_firestore.collection(_driversCollection).doc(driverId), {
+        'assignedStudentIds': updatedStudentIds,
+        'updatedAt': Timestamp.now(),
+      });
 
       // Update each student profile with driver ID
       for (final studentId in studentIds) {
         batch.update(
           _firestore.collection(_profilesCollection).doc(studentId),
-          {
-            'assignedDriverId': driverId,
-            'updatedAt': Timestamp.now(),
-          },
+          {'assignedDriverId': driverId, 'updatedAt': Timestamp.now()},
         );
       }
 
@@ -161,7 +163,10 @@ class DriverService {
       final batch = _firestore.batch();
 
       // Get current driver data
-      final driverDoc = await _firestore.collection(_driversCollection).doc(driverId).get();
+      final driverDoc = await _firestore
+          .collection(_driversCollection)
+          .doc(driverId)
+          .get();
       final driver = Driver.fromFirestore(driverDoc);
 
       // Remove student IDs from driver's list
@@ -170,13 +175,10 @@ class DriverService {
           .toList();
 
       // Update driver document
-      batch.update(
-        _firestore.collection(_driversCollection).doc(driverId),
-        {
-          'assignedStudentIds': updatedStudentIds,
-          'updatedAt': Timestamp.now(),
-        },
-      );
+      batch.update(_firestore.collection(_driversCollection).doc(driverId), {
+        'assignedStudentIds': updatedStudentIds,
+        'updatedAt': Timestamp.now(),
+      });
 
       // Remove driver ID from each student profile
       for (final studentId in studentIds) {
@@ -196,7 +198,10 @@ class DriverService {
   }
 
   // Update student order for a driver
-  Future<void> updateStudentOrder(String driverId, List<String> orderedStudentIds) async {
+  Future<void> updateStudentOrder(
+    String driverId,
+    List<String> orderedStudentIds,
+  ) async {
     try {
       await _firestore.collection(_driversCollection).doc(driverId).update({
         'assignedStudentIds': orderedStudentIds,
@@ -231,28 +236,34 @@ class DriverService {
   }) async {
     try {
       final batch = _firestore.batch();
-      
+
       // Get all drivers to check for conflicts
       final allDrivers = await getAllDrivers();
-      
+
       // Remove conflicting trips from other drivers
       for (final driver in allDrivers) {
         if (driver.uid == driverId) continue;
-        
+
         final driverTrips = driver.tripAssignments[day] ?? [];
-        final conflictingTrips = driverTrips.where((trip) => tripTypes.contains(trip)).toList();
-        
+        final conflictingTrips = driverTrips
+            .where((trip) => tripTypes.contains(trip))
+            .toList();
+
         if (conflictingTrips.isNotEmpty) {
           // Remove conflicting trips from this driver
-          final updatedTrips = driverTrips.where((trip) => !tripTypes.contains(trip)).toList();
-          final updatedAssignments = Map<String, List<String>>.from(driver.tripAssignments);
-          
+          final updatedTrips = driverTrips
+              .where((trip) => !tripTypes.contains(trip))
+              .toList();
+          final updatedAssignments = Map<String, List<String>>.from(
+            driver.tripAssignments,
+          );
+
           if (updatedTrips.isEmpty) {
             updatedAssignments.remove(day);
           } else {
             updatedAssignments[day] = updatedTrips;
           }
-          
+
           batch.update(
             _firestore.collection(_driversCollection).doc(driver.uid),
             {
@@ -262,22 +273,24 @@ class DriverService {
           );
         }
       }
-      
+
       // Get current driver to update their assignments
-      final driverDoc = await _firestore.collection(_driversCollection).doc(driverId).get();
+      final driverDoc = await _firestore
+          .collection(_driversCollection)
+          .doc(driverId)
+          .get();
       final currentDriver = Driver.fromFirestore(driverDoc);
-      final updatedAssignments = Map<String, List<String>>.from(currentDriver.tripAssignments);
-      updatedAssignments[day] = tripTypes;
-      
-      // Update the target driver with new trip assignments
-      batch.update(
-        _firestore.collection(_driversCollection).doc(driverId),
-        {
-          'tripAssignments': updatedAssignments,
-          'updatedAt': Timestamp.now(),
-        },
+      final updatedAssignments = Map<String, List<String>>.from(
+        currentDriver.tripAssignments,
       );
-      
+      updatedAssignments[day] = tripTypes;
+
+      // Update the target driver with new trip assignments
+      batch.update(_firestore.collection(_driversCollection).doc(driverId), {
+        'tripAssignments': updatedAssignments,
+        'updatedAt': Timestamp.now(),
+      });
+
       await batch.commit();
     } catch (e) {
       throw 'Error assigning trips to driver: $e';
@@ -290,7 +303,7 @@ class DriverService {
     try {
       final drivers = await getAllDrivers();
       final Map<String, Map<String, String>> assignments = {};
-      
+
       for (final driver in drivers) {
         driver.tripAssignments.forEach((day, trips) {
           if (!assignments.containsKey(day)) {
@@ -301,7 +314,7 @@ class DriverService {
           }
         });
       }
-      
+
       return assignments;
     } catch (e) {
       throw 'Error fetching trip assignments: $e';
@@ -315,19 +328,26 @@ class DriverService {
     required List<String> tripTypes,
   }) async {
     try {
-      final driverDoc = await _firestore.collection(_driversCollection).doc(driverId).get();
+      final driverDoc = await _firestore
+          .collection(_driversCollection)
+          .doc(driverId)
+          .get();
       final driver = Driver.fromFirestore(driverDoc);
-      
-      final updatedAssignments = Map<String, List<String>>.from(driver.tripAssignments);
+
+      final updatedAssignments = Map<String, List<String>>.from(
+        driver.tripAssignments,
+      );
       final currentTrips = updatedAssignments[day] ?? [];
-      final remainingTrips = currentTrips.where((trip) => !tripTypes.contains(trip)).toList();
-      
+      final remainingTrips = currentTrips
+          .where((trip) => !tripTypes.contains(trip))
+          .toList();
+
       if (remainingTrips.isEmpty) {
         updatedAssignments.remove(day);
       } else {
         updatedAssignments[day] = remainingTrips;
       }
-      
+
       await _firestore.collection(_driversCollection).doc(driverId).update({
         'tripAssignments': updatedAssignments,
         'updatedAt': Timestamp.now(),

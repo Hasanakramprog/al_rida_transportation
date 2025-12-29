@@ -31,7 +31,7 @@ class AccountingService {
         'adminId': adminId,
         'notes': notes,
       });
-      
+
       // Add payment amount to admin wallet
       await addToAdminWallet(amount, currency);
     } catch (e) {
@@ -43,7 +43,7 @@ class AccountingService {
   Future<void> addToAdminWallet(double amount, String currency) async {
     try {
       final docRef = _firestore.collection('admin_wallet').doc('main');
-      
+
       if (currency == 'USD') {
         await docRef.set({
           'totalBalanceUSD': FieldValue.increment(amount),
@@ -68,11 +68,11 @@ class AccountingService {
   Future<AdminWallet?> getAdminWallet() async {
     try {
       final doc = await _firestore.collection('admin_wallet').doc('main').get();
-      
+
       if (!doc.exists) {
         return null;
       }
-      
+
       return AdminWallet.fromMap(doc.id, doc.data() as Map<String, dynamic>);
     } catch (e) {
       throw Exception('Failed to get admin wallet: $e');
@@ -81,7 +81,9 @@ class AccountingService {
 
   // Stream admin wallet updates (real-time)
   Stream<AdminWallet?> watchAdminWallet() {
-    return _firestore.collection('admin_wallet').doc('main').snapshots().map((doc) {
+    return _firestore.collection('admin_wallet').doc('main').snapshots().map((
+      doc,
+    ) {
       if (!doc.exists) {
         return null;
       }
@@ -93,7 +95,7 @@ class AccountingService {
   Future<void> subtractFromAdminWallet(double amount, String currency) async {
     try {
       final docRef = _firestore.collection('admin_wallet').doc('main');
-      
+
       if (currency == 'USD') {
         await docRef.update({
           'totalBalanceUSD': FieldValue.increment(-amount),
@@ -113,14 +115,16 @@ class AccountingService {
   }
 
   // Get recent transactions with limit (for dashboard)
-  Future<List<PaymentTransaction>> getRecentTransactions({int limit = 5}) async {
+  Future<List<PaymentTransaction>> getRecentTransactions({
+    int limit = 5,
+  }) async {
     try {
       final snapshot = await _firestore
           .collection('payment_transactions')
           .orderBy('timestamp', descending: true)
           .limit(limit)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
           .toList();
@@ -146,7 +150,12 @@ class AccountingService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => PaymentTransaction.fromMap(
+              doc.id,
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to get paginated transactions: $e');
@@ -163,7 +172,10 @@ class AccountingService {
     try {
       Query query = _firestore
           .collection('payment_transactions')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('timestamp', descending: true)
           .limit(limit);
@@ -174,7 +186,12 @@ class AccountingService {
 
       final snapshot = await query.get();
       return snapshot.docs
-          .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => PaymentTransaction.fromMap(
+              doc.id,
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to get paginated transactions by date range: $e');
@@ -184,7 +201,10 @@ class AccountingService {
   // Get document snapshot from transaction (for pagination cursor)
   Future<DocumentSnapshot?> getDocumentSnapshot(String transactionId) async {
     try {
-      return await _firestore.collection('payment_transactions').doc(transactionId).get();
+      return await _firestore
+          .collection('payment_transactions')
+          .doc(transactionId)
+          .get();
     } catch (e) {
       return null;
     }
@@ -197,10 +217,10 @@ class AccountingService {
         .orderBy('timestamp', descending: true)
         .snapshots()
         .map((snapshot) {
-      return snapshot.docs
-          .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
-          .toList();
-    });
+          return snapshot.docs
+              .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
+              .toList();
+        });
   }
 
   // Get all transactions as Future (one-time read, use with caution for large datasets)
@@ -209,15 +229,20 @@ class AccountingService {
       Query query = _firestore
           .collection('payment_transactions')
           .orderBy('timestamp', descending: true);
-      
+
       if (limit != null) {
         query = query.limit(limit);
       }
 
       final snapshot = await query.get();
-      
+
       return snapshot.docs
-          .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data() as Map<String, dynamic>))
+          .map(
+            (doc) => PaymentTransaction.fromMap(
+              doc.id,
+              doc.data() as Map<String, dynamic>,
+            ),
+          )
           .toList();
     } catch (e) {
       throw Exception('Failed to get all transactions: $e');
@@ -226,15 +251,20 @@ class AccountingService {
 
   // Get transactions filtered by date range (one-time read)
   Future<List<PaymentTransaction>> getTransactionsByDateRange(
-      DateTime startDate, DateTime endDate) async {
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('payment_transactions')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startDate))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startDate),
+          )
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endDate))
           .orderBy('timestamp', descending: true)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
           .toList();
@@ -252,7 +282,10 @@ class AccountingService {
   }
 
   // Get transactions for current month (one-time read)
-  Future<List<PaymentTransaction>> getMonthTransactions(int year, int month) async {
+  Future<List<PaymentTransaction>> getMonthTransactions(
+    int year,
+    int month,
+  ) async {
     final startOfMonth = DateTime(year, month, 1, 0, 0, 0);
     final endOfMonth = DateTime(year, month + 1, 0, 23, 59, 59);
     return getTransactionsByDateRange(startOfMonth, endOfMonth);
@@ -302,14 +335,16 @@ class AccountingService {
   }
 
   // Get transactions by student (one-time read)
-  Future<List<PaymentTransaction>> getTransactionsByStudent(String studentId) async {
+  Future<List<PaymentTransaction>> getTransactionsByStudent(
+    String studentId,
+  ) async {
     try {
       final snapshot = await _firestore
           .collection('payment_transactions')
           .where('studentId', isEqualTo: studentId)
           .orderBy('timestamp', descending: true)
           .get();
-      
+
       return snapshot.docs
           .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
           .toList();
@@ -327,8 +362,12 @@ class AccountingService {
       final totalBalanceLBP = wallet?.totalBalanceLBP ?? 0.0;
       final totalTransactionsUSD = wallet?.totalTransactionsUSD ?? 0;
       final totalTransactionsLBP = wallet?.totalTransactionsLBP ?? 0;
-      final averagePaymentUSD = totalTransactionsUSD > 0 ? totalBalanceUSD / totalTransactionsUSD : 0.0;
-      final averagePaymentLBP = totalTransactionsLBP > 0 ? totalBalanceLBP / totalTransactionsLBP : 0.0;
+      final averagePaymentUSD = totalTransactionsUSD > 0
+          ? totalBalanceUSD / totalTransactionsUSD
+          : 0.0;
+      final averagePaymentLBP = totalTransactionsLBP > 0
+          ? totalBalanceLBP / totalTransactionsLBP
+          : 0.0;
 
       // Get today's transactions for stats
       final now = DateTime.now();
@@ -336,7 +375,10 @@ class AccountingService {
       final endOfDay = DateTime(now.year, now.month, now.day, 23, 59, 59);
       final todaySnapshot = await _firestore
           .collection('payment_transactions')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfDay),
+          )
           .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfDay))
           .get();
       final todayTransactions = todaySnapshot.docs
@@ -354,8 +396,14 @@ class AccountingService {
       final endOfMonth = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
       final monthSnapshot = await _firestore
           .collection('payment_transactions')
-          .where('timestamp', isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth))
-          .where('timestamp', isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth))
+          .where(
+            'timestamp',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(startOfMonth),
+          )
+          .where(
+            'timestamp',
+            isLessThanOrEqualTo: Timestamp.fromDate(endOfMonth),
+          )
           .get();
       final monthTransactions = monthSnapshot.docs
           .map((doc) => PaymentTransaction.fromMap(doc.id, doc.data()))
@@ -376,12 +424,20 @@ class AccountingService {
         'averagePaymentLBP': averagePaymentLBP,
         'todayBalanceUSD': todayBalanceUSD,
         'todayBalanceLBP': todayBalanceLBP,
-        'todayCountUSD': todayTransactions.where((t) => t.currency == 'USD').length,
-        'todayCountLBP': todayTransactions.where((t) => t.currency == 'LBP').length,
+        'todayCountUSD': todayTransactions
+            .where((t) => t.currency == 'USD')
+            .length,
+        'todayCountLBP': todayTransactions
+            .where((t) => t.currency == 'LBP')
+            .length,
         'monthBalanceUSD': monthBalanceUSD,
         'monthBalanceLBP': monthBalanceLBP,
-        'monthCountUSD': monthTransactions.where((t) => t.currency == 'USD').length,
-        'monthCountLBP': monthTransactions.where((t) => t.currency == 'LBP').length,
+        'monthCountUSD': monthTransactions
+            .where((t) => t.currency == 'USD')
+            .length,
+        'monthCountLBP': monthTransactions
+            .where((t) => t.currency == 'LBP')
+            .length,
       };
     } catch (e) {
       throw Exception('Failed to get statistics: $e');

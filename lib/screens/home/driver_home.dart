@@ -28,7 +28,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   final DriverPaymentService _driverPaymentService = DriverPaymentService();
   Driver? _driverProfile;
   bool _isLoading = true;
-  
+
   // Cached wallet data to minimize Firestore reads
   double _cachedBalanceUSD = 0.0;
   double _cachedBalanceLBP = 0.0;
@@ -42,7 +42,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
   Future<void> _loadWalletData() async {
     if (_driverProfile == null) return;
-    
+
     setState(() => _isLoadingWallet = true);
     try {
       final wallet = await _walletService.getDriverWallet(_driverProfile!.uid);
@@ -71,7 +71,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         _driverProfile = driver;
         _isLoading = false;
       });
-      
+
       // Load wallet data after profile is loaded
       _loadWalletData();
     } catch (e) {
@@ -131,10 +131,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                       const Text(
                         'Manage your routes, students, and daily trips',
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
+                        style: TextStyle(fontSize: 16, color: Colors.grey),
                       ),
                     ],
                   ),
@@ -163,14 +160,16 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     title: 'Morning Students',
                     subtitle: 'View morning trip students',
                     color: Colors.orange,
-                    onTap: () => Navigator.pushNamed(context, '/driver/my-students'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/driver/my-students'),
                   ),
                   _buildFeatureCard(
                     icon: Icons.wb_twilight,
                     title: 'Afternoon Students',
                     subtitle: 'Afternoon trips (1-3 PM)',
                     color: Colors.deepPurple,
-                    onTap: () => Navigator.pushNamed(context, '/driver/trip-students'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/driver/trip-students'),
                   ),
                 ],
               ),
@@ -198,11 +197,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                size: 36,
-                color: color,
-              ),
+              Icon(icon, size: 36, color: color),
               const SizedBox(height: 8),
               Text(
                 title,
@@ -216,10 +211,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               Text(
                 subtitle,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: Colors.grey,
-                ),
+                style: const TextStyle(fontSize: 11, color: Colors.grey),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -250,7 +242,8 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     }
 
     return GestureDetector(
-      onLongPress: () => _showTransferDialog(_cachedBalanceUSD, _cachedBalanceLBP),
+      onLongPress: () =>
+          _showTransferDialog(_cachedBalanceUSD, _cachedBalanceLBP),
       child: Card(
         elevation: 4,
         child: Container(
@@ -294,10 +287,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         ),
                         Text(
                           'Long press to transfer',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 11,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 11),
                         ),
                       ],
                     ),
@@ -312,10 +302,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     children: [
                       const Text(
                         'USD Balance',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -337,10 +324,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     children: [
                       const Text(
                         'LBP Balance',
-                        style: TextStyle(
-                          color: Colors.white70,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: Colors.white70, fontSize: 12),
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -365,7 +349,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   Future<void> _signOut(BuildContext context) async {
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.signOut();
-    
+
     if (context.mounted) {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -386,15 +370,21 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Current Balance:',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Colors.grey[700])),
+              Text(
+                'Current Balance:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                ),
+              ),
               const SizedBox(height: 8),
               Text('USD: \$${balanceUSD.toStringAsFixed(2)}'),
               Text('LBP: LL${balanceLBP.toStringAsFixed(2)}'),
               const SizedBox(height: 16),
-              const Text('Choose transfer option:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
+              const Text(
+                'Choose transfer option:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ],
           ),
           actions: [
@@ -444,8 +434,11 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
-  Future<void> _confirmTransfer(String currency,
-      [double? amountUSD, double? amountLBP]) async {
+  Future<void> _confirmTransfer(
+    String currency, [
+    double? amountUSD,
+    double? amountLBP,
+  ]) async {
     if (_driverProfile == null) return;
 
     final bool? confirm = await showDialog<bool>(
@@ -460,11 +453,15 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
               const Text('Are you sure you want to transfer:'),
               const SizedBox(height: 12),
               if (currency == 'USD' || currency == 'BOTH')
-                Text('USD: \$${amountUSD?.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'USD: \$${amountUSD?.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               if (currency == 'LBP' || currency == 'BOTH')
-                Text('LL${(currency == 'LBP' ? amountUSD : amountLBP)?.toStringAsFixed(2)}',
-                    style: const TextStyle(fontWeight: FontWeight.bold)),
+                Text(
+                  'LL${(currency == 'LBP' ? amountUSD : amountLBP)?.toStringAsFixed(2)}',
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
               const SizedBox(height: 12),
               const Text('This will transfer the amount to admin wallet.'),
             ],
@@ -496,7 +493,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
       if (currency == 'USD') {
         // Transfer USD
         await _walletService.subtractFromDriverWallet(
-            _driverProfile!.uid, amountUSD!, 'USD');
+          _driverProfile!.uid,
+          amountUSD!,
+          'USD',
+        );
         await _accountingService.addToAdminWallet(amountUSD, 'USD');
         await _accountingService.addTransaction(
           studentId: _driverProfile!.uid,
@@ -523,7 +523,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         // Transfer LBP
         final amount = amountUSD!; // Using first parameter for single currency
         await _walletService.subtractFromDriverWallet(
-            _driverProfile!.uid, amount, 'LBP');
+          _driverProfile!.uid,
+          amount,
+          'LBP',
+        );
         await _accountingService.addToAdminWallet(amount, 'LBP');
         await _accountingService.addTransaction(
           studentId: _driverProfile!.uid,
@@ -550,7 +553,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         // Transfer both USD and LBP
         if (amountUSD != null && amountUSD > 0) {
           await _walletService.subtractFromDriverWallet(
-              _driverProfile!.uid, amountUSD, 'USD');
+            _driverProfile!.uid,
+            amountUSD,
+            'USD',
+          );
           await _accountingService.addToAdminWallet(amountUSD, 'USD');
           await _accountingService.addTransaction(
             studentId: _driverProfile!.uid,
@@ -576,7 +582,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
         }
         if (amountLBP != null && amountLBP > 0) {
           await _walletService.subtractFromDriverWallet(
-              _driverProfile!.uid, amountLBP, 'LBP');
+            _driverProfile!.uid,
+            amountLBP,
+            'LBP',
+          );
           await _accountingService.addToAdminWallet(amountLBP, 'LBP');
           await _accountingService.addTransaction(
             studentId: _driverProfile!.uid,
@@ -669,10 +678,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
             const SizedBox(height: 12),
             const Text(
               'Record daily student payments directly to your wallet',
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.white70, fontSize: 12),
             ),
             const SizedBox(height: 16),
             Row(
@@ -705,7 +711,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.white,
                     foregroundColor: Colors.blue.shade700,
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
                   ),
                   icon: const Icon(Icons.list),
                   label: const Text(
@@ -733,14 +742,14 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     // Function to format number with thousand separators
     String _formatNumber(String text) {
       if (text.isEmpty) return '';
-      
+
       // Remove all non-digit characters except decimal point
       String cleanText = text.replaceAll(RegExp(r'[^\d.]'), '');
-      
+
       // Split by decimal point
       List<String> parts = cleanText.split('.');
       String integerPart = parts[0];
-      
+
       // Format integer part with thousand separators
       if (integerPart.isNotEmpty) {
         final number = int.tryParse(integerPart);
@@ -748,7 +757,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
           integerPart = NumberFormat('#,###').format(number);
         }
       }
-      
+
       // Combine with decimal part if exists
       if (parts.length > 1) {
         return '$integerPart.${parts[1]}';
@@ -832,8 +841,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                     const SizedBox(height: 8),
                     TextField(
                       controller: amountController,
-                      keyboardType:
-                          const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: InputDecoration(
                         hintText: 'Enter amount',
                         border: OutlineInputBorder(
@@ -847,7 +857,9 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
                         if (formatted != value) {
                           amountController.value = TextEditingValue(
                             text: formatted,
-                            selection: TextSelection.collapsed(offset: formatted.length),
+                            selection: TextSelection.collapsed(
+                              offset: formatted.length,
+                            ),
                           );
                         }
                       },
@@ -915,7 +927,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
                     try {
                       // Remove commas before parsing
-                      final cleanAmount = amountController.text.replaceAll(',', '');
+                      final cleanAmount = amountController.text.replaceAll(
+                        ',',
+                        '',
+                      );
                       final amount = double.parse(cleanAmount);
 
                       // Add payment to driver wallet only
@@ -996,10 +1011,7 @@ class StudentSearchDelegate extends SearchDelegate<StudentProfile?> {
         border: InputBorder.none,
       ),
       textTheme: TextTheme(
-        titleLarge: TextStyle(
-          color: Colors.white,
-          fontSize: 18,
-        ),
+        titleLarge: TextStyle(color: Colors.white, fontSize: 18),
       ),
     );
   }
@@ -1043,8 +1055,12 @@ class StudentSearchDelegate extends SearchDelegate<StudentProfile?> {
     final suggestions = query.isEmpty
         ? students
         : students.where((student) {
-            return student.fullName.toLowerCase().contains(query.toLowerCase()) ||
-                student.university.toLowerCase().contains(query.toLowerCase()) ||
+            return student.fullName.toLowerCase().contains(
+                  query.toLowerCase(),
+                ) ||
+                student.university.toLowerCase().contains(
+                  query.toLowerCase(),
+                ) ||
                 student.phoneNumber.contains(query);
           }).toList();
 
@@ -1061,10 +1077,7 @@ class StudentSearchDelegate extends SearchDelegate<StudentProfile?> {
             const SizedBox(height: 16),
             Text(
               'No students found',
-              style: TextStyle(
-                fontSize: 16,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
             ),
           ],
         ),
@@ -1088,10 +1101,7 @@ class StudentSearchDelegate extends SearchDelegate<StudentProfile?> {
           ),
           title: Text(
             student.fullName,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 16,
-            ),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
           ),
           subtitle: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1099,17 +1109,11 @@ class StudentSearchDelegate extends SearchDelegate<StudentProfile?> {
               const SizedBox(height: 2),
               Text(
                 student.university,
-                style: TextStyle(
-                  fontSize: 13,
-                  color: Colors.grey.shade700,
-                ),
+                style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
               ),
               Text(
                 student.phoneNumber,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: Colors.grey.shade600,
-                ),
+                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               ),
             ],
           ),

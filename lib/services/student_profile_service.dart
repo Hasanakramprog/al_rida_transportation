@@ -4,7 +4,7 @@ import 'monthly_payment_service.dart';
 
 class StudentProfileService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  
+
   // Collections
   static const String _schedulesCollection = 'schedule_suffixes';
   static const String _profilesCollection = 'student_profiles';
@@ -16,7 +16,7 @@ class StudentProfileService {
           .collection(_schedulesCollection)
           .orderBy('code')
           .get();
-      
+
       return snapshot.docs
           .map((doc) => ScheduleSuffix.fromFirestore(doc))
           .toList();
@@ -32,7 +32,7 @@ class StudentProfileService {
           .collection(_schedulesCollection)
           .doc(id)
           .get();
-      
+
       if (doc.exists) {
         return ScheduleSuffix.fromFirestore(doc);
       }
@@ -50,14 +50,12 @@ class StudentProfileService {
           .where('zone', isEqualTo: zone)
           .orderBy('name')
           .get();
-      
+
       return snapshot.docs.map((doc) => City.fromFirestore(doc)).toList();
     } catch (e) {
       throw 'Error loading cities: $e';
     }
   }
-
-
 
   // Get all cities from Firestore
   Future<List<City>> getAllCities() async {
@@ -67,7 +65,7 @@ class StudentProfileService {
           .orderBy('zone')
           .orderBy('name')
           .get();
-      
+
       return snapshot.docs.map((doc) => City.fromFirestore(doc)).toList();
     } catch (e) {
       throw 'Error loading all cities: $e';
@@ -81,15 +79,17 @@ class StudentProfileService {
           .collection(_profilesCollection)
           .orderBy('createdAt', descending: true)
           .get();
-      
+
       final students = <StudentProfile>[];
       for (var doc in snapshot.docs) {
         if (doc.exists) {
           final data = doc.data();
           final scheduleSuffixId = data['scheduleSuffixId'] as String?;
-          
+
           if (scheduleSuffixId != null) {
-            final scheduleSuffix = await getScheduleSuffixById(scheduleSuffixId);
+            final scheduleSuffix = await getScheduleSuffixById(
+              scheduleSuffixId,
+            );
             if (scheduleSuffix != null) {
               students.add(StudentProfile.fromMap(data, scheduleSuffix));
             }
@@ -109,11 +109,11 @@ class StudentProfileService {
           .collection(_profilesCollection)
           .doc(uid)
           .get();
-      
+
       if (doc.exists && doc.data() != null) {
         final data = doc.data()!;
         final scheduleSuffixId = data['scheduleSuffixId'] as String?;
-        
+
         if (scheduleSuffixId != null) {
           final scheduleSuffix = await getScheduleSuffixById(scheduleSuffixId);
           if (scheduleSuffix != null) {
@@ -149,8 +149,16 @@ class StudentProfileService {
       // Create yearly payment records using MonthlyPaymentService
       final paymentService = MonthlyPaymentService();
       final currentYear = DateTime.now().year;
-      await paymentService.createYearlyPaymentRecords(profile.uid, profile.subscriptionCost, currentYear);
-      await paymentService.createYearlyPaymentRecords(profile.uid, profile.subscriptionCost, currentYear + 1);
+      await paymentService.createYearlyPaymentRecords(
+        profile.uid,
+        profile.subscriptionCost,
+        currentYear,
+      );
+      await paymentService.createYearlyPaymentRecords(
+        profile.uid,
+        profile.subscriptionCost,
+        currentYear + 1,
+      );
     } catch (e) {
       throw 'Error saving profile: $e';
     }
@@ -162,10 +170,7 @@ class StudentProfileService {
     required bool isPaid,
   }) async {
     try {
-      await _firestore
-          .collection(_profilesCollection)
-          .doc(studentUid)
-          .update({
+      await _firestore.collection(_profilesCollection).doc(studentUid).update({
         'isPaid': isPaid,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
         'paidAt': isPaid ? Timestamp.fromDate(DateTime.now()) : null,
@@ -191,10 +196,7 @@ class StudentProfileService {
   // Delete student profile
   Future<void> deleteStudentProfile(String uid) async {
     try {
-      await _firestore
-          .collection(_profilesCollection)
-          .doc(uid)
-          .delete();
+      await _firestore.collection(_profilesCollection).doc(uid).delete();
     } catch (e) {
       throw 'Error deleting profile: $e';
     }
@@ -222,9 +224,12 @@ class StudentProfileService {
 
       // Remove existing payment for this month if exists
       final updatedHistory = profile.paymentHistory
-          .where((payment) => !(payment.year == now.year && payment.month == now.month))
+          .where(
+            (payment) =>
+                !(payment.year == now.year && payment.month == now.month),
+          )
           .toList();
-      
+
       updatedHistory.add(newPaymentHistory);
 
       final updatedProfile = profile.copyWith(
@@ -253,7 +258,7 @@ class StudentProfileService {
       }
 
       final now = DateTime.now();
-      
+
       // Check if already paid for current month
       if (profile.isPaidForMonth(now.year, now.month)) {
         return; // Already paid for this month
@@ -281,7 +286,7 @@ class StudentProfileService {
     try {
       final now = DateTime.now();
       final snapshot = await _firestore.collection(_profilesCollection).get();
-      
+
       for (final doc in snapshot.docs) {
         try {
           final profile = await getStudentProfile(doc.id);
@@ -299,13 +304,13 @@ class StudentProfileService {
 
   // ADMIN ONLY: Toggle student active status
   // When deactivated, removes student from all driver assignments
-  Future<void> toggleStudentActiveStatus(String studentUid, bool isActive) async {
+  Future<void> toggleStudentActiveStatus(
+    String studentUid,
+    bool isActive,
+  ) async {
     try {
       // Update student's isActive status
-      await _firestore
-          .collection(_profilesCollection)
-          .doc(studentUid)
-          .update({
+      await _firestore.collection(_profilesCollection).doc(studentUid).update({
         'isActive': isActive,
         'updatedAt': Timestamp.fromDate(DateTime.now()),
       });
@@ -327,13 +332,19 @@ class StudentProfileService {
 
       for (var driverDoc in driversSnapshot.docs) {
         final driverData = driverDoc.data();
-        
+
         // Remove from morning trip (assignedStudentIds)
-        final assignedStudentIds = List<String>.from(driverData['assignedStudentIds'] ?? []);
-        final updatedMorningStudents = assignedStudentIds.where((id) => id != studentUid).toList();
+        final assignedStudentIds = List<String>.from(
+          driverData['assignedStudentIds'] ?? [],
+        );
+        final updatedMorningStudents = assignedStudentIds
+            .where((id) => id != studentUid)
+            .toList();
 
         // Remove from afternoon trips (tripAssignments)
-        final tripAssignments = Map<String, dynamic>.from(driverData['tripAssignments'] ?? {});
+        final tripAssignments = Map<String, dynamic>.from(
+          driverData['tripAssignments'] ?? {},
+        );
         final updatedTripAssignments = <String, dynamic>{};
 
         tripAssignments.forEach((day, trips) {

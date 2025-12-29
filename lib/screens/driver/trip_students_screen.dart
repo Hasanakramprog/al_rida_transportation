@@ -17,7 +17,7 @@ class TripStudentsScreen extends StatefulWidget {
 class _TripStudentsScreenState extends State<TripStudentsScreen> {
   final DriverService _driverService = DriverService();
   final StudentProfileService _studentService = StudentProfileService();
-  
+
   List<StudentProfile> _tripStudents = [];
   Driver? _driverProfile;
   bool _isLoading = true;
@@ -36,15 +36,15 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
     final now = DateTime.now();
     final currentHour = now.hour;
     final currentMinute = now.minute;
-    
+
     // Convert current time to minutes since midnight for easier comparison
     final currentTimeInMinutes = currentHour * 60 + currentMinute;
-    
+
     // 3:30 PM = 15:30 = 15 * 60 + 30 = 930 minutes
     const cutoffTimeInMinutes = 15 * 60 + 30; // 3:30 PM
-    
+
     DateTime targetDate;
-    
+
     // If current time is after 3:30 PM, show next day's students
     if (currentTimeInMinutes >= cutoffTimeInMinutes) {
       targetDate = now.add(const Duration(days: 1));
@@ -52,10 +52,19 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
       // Before 3:30 PM, show today's students
       targetDate = now;
     }
-    
+
     // Get day name (Monday, Tuesday, etc.)
-    const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
-    return dayNames[targetDate.weekday - 1]; // weekday is 1-7, where 1 is Monday
+    const dayNames = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    return dayNames[targetDate.weekday -
+        1]; // weekday is 1-7, where 1 is Monday
   }
 
   // Set the initial selected day after data is loaded
@@ -72,7 +81,7 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
   Future<void> _loadTripStudents() async {
     try {
       setState(() => _isLoading = true);
-      
+
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
 
@@ -85,12 +94,12 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
 
       // Get all students
       final allStudents = await _studentService.getAllStudents();
-      
+
       // Filter students based on driver's trip assignments
       _tripStudents = _filterStudentsByTripAssignments(allStudents);
 
       setState(() => _isLoading = false);
-      
+
       // Set initial day after data is loaded
       _setInitialDay();
     } catch (e) {
@@ -103,7 +112,9 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
     }
   }
 
-  List<StudentProfile> _filterStudentsByTripAssignments(List<StudentProfile> allStudents) {
+  List<StudentProfile> _filterStudentsByTripAssignments(
+    List<StudentProfile> allStudents,
+  ) {
     if (_driverProfile == null || _driverProfile!.tripAssignments.isEmpty) {
       return [];
     }
@@ -146,16 +157,20 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
   Future<void> _openWhatsApp(String phoneNumber) async {
     // Remove any non-digit characters from phone number
     final cleanNumber = phoneNumber.replaceAll(RegExp(r'[^0-9+]'), '');
-    
+
     // WhatsApp URL scheme
     final whatsappUrl = Uri.parse('https://wa.me/$cleanNumber');
-    
+
     try {
       await launchUrl(whatsappUrl, mode: LaunchMode.externalApplication);
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Could not open WhatsApp. Please make sure it is installed.')),
+          const SnackBar(
+            content: Text(
+              'Could not open WhatsApp. Please make sure it is installed.',
+            ),
+          ),
         );
       }
     }
@@ -175,10 +190,10 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
     // Apply trip filter
     if (_selectedTrip != null) {
       students = students.where((student) {
-        final timeSlot = _selectedDay != null 
+        final timeSlot = _selectedDay != null
             ? student.dayTimeSlots[_selectedDay]
             : student.dayTimeSlots.values.first;
-        
+
         if (_selectedTrip == 'trip1') return timeSlot == TimeSlot.onepm;
         if (_selectedTrip == 'trip2') return timeSlot == TimeSlot.twopm;
         if (_selectedTrip == 'trip3') return timeSlot == TimeSlot.threepm;
@@ -191,8 +206,8 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
       students = students.where((student) {
         final query = _searchQuery.toLowerCase();
         return student.fullName.toLowerCase().contains(query) ||
-               student.phoneNumber.contains(query) ||
-               student.university.toLowerCase().contains(query);
+            student.phoneNumber.contains(query) ||
+            student.university.toLowerCase().contains(query);
       }).toList();
     }
 
@@ -206,8 +221,9 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
-    
+    final timeStr =
+        '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';
+
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -218,7 +234,10 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
             if (_selectedDay != null)
               Text(
                 '$_selectedDay ($timeStr)',
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w300),
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w300,
+                ),
               ),
           ],
         ),
@@ -257,10 +276,14 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
             backgroundColor: Colors.deepPurple,
             radius: 30,
             child: Text(
-              _driverProfile?.fullName.isNotEmpty == true 
-                  ? _driverProfile!.fullName[0].toUpperCase() 
+              _driverProfile?.fullName.isNotEmpty == true
+                  ? _driverProfile!.fullName[0].toUpperCase()
                   : 'D',
-              style: const TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 16),
@@ -270,7 +293,10 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
               children: [
                 Text(
                   _driverProfile?.fullName ?? 'Driver',
-                  style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 Text(
                   'Zone ${_driverProfile?.zone ?? '-'} • ${_tripStudents.length} Trip ${_tripStudents.length == 1 ? 'Student' : 'Students'}',
@@ -314,14 +340,22 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue.shade700, size: 20),
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.blue.shade700,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       isAfterCutoff
                           ? 'Showing tomorrow\'s students ($targetDay) - After 3:30 PM cutoff'
                           : 'Showing today\'s students ($targetDay) - Before 3:30 PM cutoff',
-                      style: TextStyle(fontSize: 12, color: Colors.blue.shade900, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.blue.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
@@ -338,34 +372,55 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange.shade700, size: 20),
+                  Icon(
+                    Icons.warning_amber,
+                    color: Colors.orange.shade700,
+                    size: 20,
+                  ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       'No trips assigned for $targetDay. Showing all available trip days.',
-                      style: TextStyle(fontSize: 12, color: Colors.orange.shade900, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.orange.shade900,
+                        fontWeight: FontWeight.w500,
+                      ),
                     ),
                   ),
                 ],
               ),
             ),
-          const Text('Filter by:', style: TextStyle(fontWeight: FontWeight.bold)),
+          const Text(
+            'Filter by:',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           const SizedBox(height: 8),
           Row(
             children: [
               Expanded(
                 child: DropdownButtonFormField<String>(
-                  value: _availableDays.contains(_selectedDay) ? _selectedDay : null,
+                  value: _availableDays.contains(_selectedDay)
+                      ? _selectedDay
+                      : null,
                   decoration: InputDecoration(
                     labelText: 'Day',
                     prefixIcon: const Icon(Icons.calendar_today, size: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   items: [
-                    const DropdownMenuItem(value: null, child: Text('All Days')),
+                    const DropdownMenuItem(
+                      value: null,
+                      child: Text('All Days'),
+                    ),
                     ..._availableDays.map((day) {
                       return DropdownMenuItem(value: day, child: Text(day));
                     }),
@@ -382,10 +437,15 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                   decoration: InputDecoration(
                     labelText: 'Trip',
                     prefixIcon: const Icon(Icons.local_shipping, size: 20),
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
                   ),
                   items: const [
                     DropdownMenuItem(value: null, child: Text('All Trips')),
@@ -412,9 +472,7 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
         decoration: InputDecoration(
           hintText: 'Search students by name, phone, or university',
           prefixIcon: const Icon(Icons.search),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
           filled: true,
           fillColor: Colors.grey.shade100,
         ),
@@ -492,7 +550,8 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
     String dayTimeInfo = '';
     student.selectedDays.forEach((day) {
       final timeSlot = student.dayTimeSlots[day];
-      if (timeSlot != null && _driverProfile!.tripAssignments[day]?.isNotEmpty == true) {
+      if (timeSlot != null &&
+          _driverProfile!.tripAssignments[day]?.isNotEmpty == true) {
         if (dayTimeInfo.isNotEmpty) dayTimeInfo += ', ';
         dayTimeInfo += '$day ${timeSlot.displayName}';
       }
@@ -534,8 +593,14 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                 backgroundColor: Colors.blue.shade600,
                 radius: 28,
                 child: Text(
-                  student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
-                  style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                  student.fullName.isNotEmpty
+                      ? student.fullName[0].toUpperCase()
+                      : '?',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -554,12 +619,19 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.access_time,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             dayTimeInfo,
-                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey.shade700,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -568,11 +640,18 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.phone, size: 14, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.phone,
+                          size: 14,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           student.phoneNumber,
-                          style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade700,
+                          ),
                         ),
                       ],
                     ),
@@ -633,8 +712,14 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                       backgroundColor: Colors.blue.shade600,
                       radius: 35,
                       child: Text(
-                        student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
-                        style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold),
+                        student.fullName.isNotEmpty
+                            ? student.fullName[0].toUpperCase()
+                            : '?',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 28,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16),
@@ -644,11 +729,18 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                         children: [
                           Text(
                             student.fullName,
-                            style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                           Text(
                             'Trip Student',
-                            style: TextStyle(fontSize: 12, color: Colors.deepPurple.shade600, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.deepPurple.shade600,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ],
                       ),
@@ -661,19 +753,27 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                 // Details
                 _buildDetailRow(Icons.phone, 'Phone', student.phoneNumber),
                 _buildDetailRow(Icons.school, 'University', student.university),
-                _buildDetailRow(Icons.location_city, 'City', '${student.city.name} (Zone ${student.city.zone})'),
+                _buildDetailRow(
+                  Icons.location_city,
+                  'City',
+                  '${student.city.name} (Zone ${student.city.zone})',
+                ),
                 const SizedBox(height: 16),
                 const Divider(),
                 const SizedBox(height: 16),
                 // Trip Days & Times
-                const Text('Trip Schedule:', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                const Text(
+                  'Trip Schedule:',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                ),
                 const SizedBox(height: 12),
                 ...student.selectedDays.map((day) {
                   final timeSlot = student.dayTimeSlots[day];
-                  final driverHasTrip = _driverProfile?.tripAssignments[day]?.isNotEmpty == true;
-                  
+                  final driverHasTrip =
+                      _driverProfile?.tripAssignments[day]?.isNotEmpty == true;
+
                   if (!driverHasTrip) return const SizedBox.shrink();
-                  
+
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: Row(
@@ -681,21 +781,39 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.calendar_today, size: 16, color: Colors.grey.shade600),
+                            Icon(
+                              Icons.calendar_today,
+                              size: 16,
+                              color: Colors.grey.shade600,
+                            ),
                             const SizedBox(width: 8),
-                            Text(day, style: const TextStyle(fontWeight: FontWeight.w600)),
+                            Text(
+                              day,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
                           ],
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.deepPurple.shade50,
                             borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.deepPurple.shade200),
+                            border: Border.all(
+                              color: Colors.deepPurple.shade200,
+                            ),
                           ),
                           child: Text(
                             timeSlot?.displayName ?? 'No time',
-                            style: TextStyle(color: Colors.deepPurple.shade700, fontSize: 12, fontWeight: FontWeight.w600),
+                            style: TextStyle(
+                              color: Colors.deepPurple.shade700,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
                       ],
@@ -761,7 +879,10 @@ class _TripStudentsScreenState extends State<TripStudentsScreen> {
                 const SizedBox(height: 2),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

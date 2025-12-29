@@ -42,11 +42,11 @@ class AuthService {
         email: email,
         password: password,
       );
-      
+
       if (credential.user != null) {
         await _updateLastLoginTime(credential.user!.uid);
       }
-      
+
       return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthError(e);
@@ -73,14 +73,14 @@ class AuthService {
       if (credential.user != null) {
         // Update display name
         await credential.user!.updateDisplayName(displayName);
-        
+
         // Create user document in Firestore
         await _createUserDocument(
           credential.user!,
           displayName: displayName,
           role: role,
         );
-        
+
         // If registering as a driver, create driver profile
         if (role == UserRole.driver && phoneNumber != null && zone != null) {
           await _createDriverProfile(
@@ -108,7 +108,8 @@ class AuthService {
       if (googleUser == null) return null;
 
       // Obtain auth details from request
-      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
 
       // Create a new credential
       final credential = GoogleAuthProvider.credential(
@@ -125,7 +126,7 @@ class AuthService {
           userCredential.user!,
           role: defaultRole ?? UserRole.student,
         );
-        
+
         await _updateLastLoginTime(userCredential.user!.uid);
       }
 
@@ -140,10 +141,7 @@ class AuthService {
   // Sign out
   Future<void> signOut() async {
     try {
-      await Future.wait([
-        _auth.signOut(),
-        _googleSignIn.signOut(),
-      ]);
+      await Future.wait([_auth.signOut(), _googleSignIn.signOut()]);
     } catch (e) {
       throw 'Error signing out';
     }
@@ -184,7 +182,7 @@ class AuthService {
     required UserRole role,
   }) async {
     final doc = await _firestore.collection('users').doc(user.uid).get();
-    
+
     if (!doc.exists) {
       await _createUserDocument(
         user,

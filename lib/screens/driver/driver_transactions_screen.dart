@@ -17,24 +17,24 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
   final DriverPaymentService _paymentService = DriverPaymentService();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+
   String _filterCurrency = 'ALL';
   String _searchQuery = '';
   DateTimeRange? _dateRange;
-  
+
   // Pagination
   List<DriverPaymentTransaction> _transactions = [];
   DocumentSnapshot? _lastDocument;
   bool _isLoading = false;
   bool _hasMore = true;
   bool _isInitialLoad = true;
-  
+
   @override
   void initState() {
     super.initState();
     _loadInitialTransactions();
   }
-  
+
   @override
   void dispose() {
     _searchController.dispose();
@@ -64,16 +64,19 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
     });
 
     try {
-      final newTransactions = await _paymentService.getPaginatedDriverTransactions(
-        driverId: currentUser.uid,
-        lastDocument: _lastDocument,
-      );
+      final newTransactions = await _paymentService
+          .getPaginatedDriverTransactions(
+            driverId: currentUser.uid,
+            lastDocument: _lastDocument,
+          );
 
       if (newTransactions.isNotEmpty) {
         // Get the last document for next pagination
         final lastTransaction = newTransactions.last;
-        final doc = await _paymentService.getDocumentSnapshot(lastTransaction.id);
-        
+        final doc = await _paymentService.getDocumentSnapshot(
+          lastTransaction.id,
+        );
+
         setState(() {
           _transactions.addAll(newTransactions);
           _lastDocument = doc;
@@ -164,7 +167,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
               },
             ),
           ),
-          
+
           // Active Filters Display
           if (_filterCurrency != 'ALL' || _dateRange != null)
             Container(
@@ -208,11 +211,9 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
                 ],
               ),
             ),
-          
+
           // Transactions List
-          Expanded(
-            child: _buildTransactionsList(),
-          ),
+          Expanded(child: _buildTransactionsList()),
         ],
       ),
     );
@@ -229,13 +230,13 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
       if (_filterCurrency != 'ALL' && t.currency != _filterCurrency) {
         return false;
       }
-      
+
       // Search filter
-      if (_searchQuery.isNotEmpty && 
+      if (_searchQuery.isNotEmpty &&
           !t.studentName.toLowerCase().contains(_searchQuery.toLowerCase())) {
         return false;
       }
-      
+
       // Date range filter
       if (_dateRange != null) {
         final transactionDate = DateTime(
@@ -253,13 +254,13 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
           _dateRange!.end.month,
           _dateRange!.end.day,
         );
-        
-        if (transactionDate.isBefore(startDate) || 
+
+        if (transactionDate.isBefore(startDate) ||
             transactionDate.isAfter(endDate)) {
           return false;
         }
       }
-      
+
       return true;
     }).toList();
 
@@ -268,11 +269,12 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long,
-                size: 80, color: Colors.grey.shade300),
+            Icon(Icons.receipt_long, size: 80, color: Colors.grey.shade300),
             const SizedBox(height: 16),
             Text(
-              _searchQuery.isNotEmpty || _filterCurrency != 'ALL' || _dateRange != null
+              _searchQuery.isNotEmpty ||
+                      _filterCurrency != 'ALL' ||
+                      _dateRange != null
                   ? 'No matching transactions'
                   : 'No transactions yet',
               style: TextStyle(
@@ -283,7 +285,9 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              _searchQuery.isNotEmpty || _filterCurrency != 'ALL' || _dateRange != null
+              _searchQuery.isNotEmpty ||
+                      _filterCurrency != 'ALL' ||
+                      _dateRange != null
                   ? 'Try adjusting your filters'
                   : 'Student payments will appear here',
               style: TextStyle(color: Colors.grey.shade500),
@@ -320,10 +324,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
             children: [
               const Text(
                 'Total Collected',
-                style: TextStyle(
-                  color: Colors.white70,
-                  fontSize: 14,
-                ),
+                style: TextStyle(color: Colors.white70, fontSize: 14),
               ),
               const SizedBox(height: 12),
               Row(
@@ -334,10 +335,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
                       children: [
                         const Text(
                           'USD',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -361,10 +359,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
                       children: [
                         const Text(
                           'LBP',
-                          style: TextStyle(
-                            color: Colors.white70,
-                            fontSize: 12,
-                          ),
+                          style: TextStyle(color: Colors.white70, fontSize: 12),
                         ),
                         const SizedBox(height: 4),
                         Text(
@@ -382,10 +377,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
               const SizedBox(height: 8),
               Text(
                 '${filteredTransactions.length} transactions',
-                style: const TextStyle(
-                  color: Colors.white70,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: Colors.white70, fontSize: 12),
               ),
             ],
           ),
@@ -402,26 +394,23 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
                 // Load more button
                 return _buildLoadMoreButton();
               }
-              
+
               final transaction = filteredTransactions[index];
               return _buildTransactionCard(transaction);
             },
           ),
         ),
-        
+
         // Show status at bottom
         if (_transactions.isNotEmpty)
           Container(
             padding: const EdgeInsets.all(8),
             color: Colors.grey.shade100,
             child: Text(
-              _hasMore 
+              _hasMore
                   ? 'Loaded ${filteredTransactions.length} transactions • Tap "Load More" for next batch'
                   : 'All ${filteredTransactions.length} transactions loaded',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
           ),
@@ -453,7 +442,10 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
                   onTap: _loadMoreTransactions,
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -561,7 +553,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
 
   Widget _buildTransactionCard(DriverPaymentTransaction transaction) {
     final isAdminTransfer = transaction.studentId == 'ADMIN';
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
@@ -570,23 +562,20 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
           backgroundColor: isAdminTransfer
               ? Colors.red.shade100
               : (transaction.currency == 'USD'
-                  ? Colors.green.shade100
-                  : Colors.blue.shade100),
+                    ? Colors.green.shade100
+                    : Colors.blue.shade100),
           child: Icon(
             isAdminTransfer ? Icons.upload : Icons.person,
             color: isAdminTransfer
                 ? Colors.red.shade700
                 : (transaction.currency == 'USD'
-                    ? Colors.green.shade700
-                    : Colors.blue.shade700),
+                      ? Colors.green.shade700
+                      : Colors.blue.shade700),
           ),
         ),
         title: Text(
           transaction.studentName,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -594,10 +583,7 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
             const SizedBox(height: 4),
             Text(
               '${transaction.formattedDate} at ${transaction.formattedTime}',
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                fontSize: 12,
-              ),
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 12),
             ),
             if (transaction.notes != null) ...[
               const SizedBox(height: 2),
@@ -618,8 +604,8 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
             color: isAdminTransfer
                 ? Colors.red.shade50
                 : (transaction.currency == 'USD'
-                    ? Colors.green.shade50
-                    : Colors.blue.shade50),
+                      ? Colors.green.shade50
+                      : Colors.blue.shade50),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Text(
@@ -628,8 +614,8 @@ class _DriverTransactionsScreenState extends State<DriverTransactionsScreen> {
               color: isAdminTransfer
                   ? Colors.red.shade700
                   : (transaction.currency == 'USD'
-                      ? Colors.green.shade700
-                      : Colors.blue.shade700),
+                        ? Colors.green.shade700
+                        : Colors.blue.shade700),
               fontWeight: FontWeight.bold,
               fontSize: 16,
             ),

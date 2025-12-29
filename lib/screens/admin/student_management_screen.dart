@@ -9,27 +9,28 @@ class StudentManagementScreen extends StatefulWidget {
   const StudentManagementScreen({super.key});
 
   @override
-  State<StudentManagementScreen> createState() => _StudentManagementScreenState();
+  State<StudentManagementScreen> createState() =>
+      _StudentManagementScreenState();
 }
 
 class _StudentManagementScreenState extends State<StudentManagementScreen> {
   final StudentProfileService _studentService = StudentProfileService();
   final MonthlyPaymentService _paymentService = MonthlyPaymentService();
-  
+
   List<StudentProfile> _allStudents = [];
   List<StudentProfile> _filteredStudents = [];
   Map<String, MonthlyPayment?> _currentMonthPayments = {};
   Map<String, String> _studentEmails = {}; // Cache student emails
-  
+
   bool _isLoading = true;
   String _searchQuery = '';
   String _paymentFilter = 'all'; // all, paid, unpaid, partial
   String _activeFilter = 'active'; // all, active, inactive
-  
+
   // Sorting
   int _sortColumnIndex = 0;
   bool _sortAscending = true;
-  
+
   @override
   void initState() {
     super.initState();
@@ -39,15 +40,15 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   Future<void> _loadStudents() async {
     try {
       setState(() => _isLoading = true);
-      
+
       _allStudents = await _studentService.getAllStudents();
-      
+
       // Load current month payment status for each student
       final currentDate = DateTime.now();
       for (var student in _allStudents) {
         // Use UID as placeholder for email (in production, get from Firebase Auth)
         _studentEmails[student.uid] = student.uid;
-        
+
         // Get current month payment
         final payment = await _paymentService.getPaymentStatus(
           studentUid: student.uid,
@@ -56,16 +57,16 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         );
         _currentMonthPayments[student.uid] = payment;
       }
-      
+
       _applyFiltersAndSort();
-      
+
       setState(() => _isLoading = false);
     } catch (e) {
       setState(() => _isLoading = false);
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading students: $e')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error loading students: $e')));
       }
     }
   }
@@ -80,26 +81,33 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         final matchesName = student.fullName.toLowerCase().contains(query);
         final matchesPhone = student.phoneNumber.toLowerCase().contains(query);
         final matchesUni = student.university.toLowerCase().contains(query);
-        if (!matchesEmail && !matchesName && !matchesPhone && !matchesUni) return false;
+        if (!matchesEmail && !matchesName && !matchesPhone && !matchesUni)
+          return false;
       }
-      
+
       // Active status filter
       if (_activeFilter != 'all') {
         if (_activeFilter == 'active' && !student.isActive) return false;
         if (_activeFilter == 'inactive' && student.isActive) return false;
       }
-      
+
       // Payment filter
       if (_paymentFilter != 'all') {
         final payment = _currentMonthPayments[student.uid];
-        if (_paymentFilter == 'paid' && (payment == null || !payment.isFullyPaid)) return false;
-        if (_paymentFilter == 'unpaid' && (payment != null && payment.paidAmount > 0)) return false;
-        if (_paymentFilter == 'partial' && (payment == null || !payment.isPartiallyPaid)) return false;
+        if (_paymentFilter == 'paid' &&
+            (payment == null || !payment.isFullyPaid))
+          return false;
+        if (_paymentFilter == 'unpaid' &&
+            (payment != null && payment.paidAmount > 0))
+          return false;
+        if (_paymentFilter == 'partial' &&
+            (payment == null || !payment.isPartiallyPaid))
+          return false;
       }
-      
+
       return true;
     }).toList();
-    
+
     _sortStudents();
   }
 
@@ -152,8 +160,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _filteredStudents.isEmpty
-                    ? _buildEmptyState()
-                    : _buildStudentsTable(),
+                ? _buildEmptyState()
+                : _buildStudentsTable(),
           ),
         ],
       ),
@@ -170,7 +178,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             decoration: InputDecoration(
               hintText: 'Search by name, email, phone, or university...',
               prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
               filled: true,
               fillColor: Colors.white,
             ),
@@ -188,7 +198,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                 child: _buildFilterDropdown(
                   label: 'Status',
                   value: _activeFilter,
-                  items: const {'all': 'All Students', 'active': 'Active', 'inactive': 'Inactive'},
+                  items: const {
+                    'all': 'All Students',
+                    'active': 'Active',
+                    'inactive': 'Inactive',
+                  },
                   onChanged: (value) {
                     setState(() {
                       _activeFilter = value!;
@@ -202,7 +216,12 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                 child: _buildFilterDropdown(
                   label: 'Payment Status',
                   value: _paymentFilter,
-                  items: const {'all': 'All', 'paid': 'Paid', 'unpaid': 'Unpaid', 'partial': 'Partial'},
+                  items: const {
+                    'all': 'All',
+                    'paid': 'Paid',
+                    'unpaid': 'Unpaid',
+                    'partial': 'Partial',
+                  },
                   onChanged: (value) {
                     setState(() {
                       _paymentFilter = value!;
@@ -233,7 +252,12 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
       value: value,
-      items: items.entries.map((entry) => DropdownMenuItem(value: entry.key, child: Text(entry.value))).toList(),
+      items: items.entries
+          .map(
+            (entry) =>
+                DropdownMenuItem(value: entry.key, child: Text(entry.value)),
+          )
+          .toList(),
       onChanged: onChanged,
     );
   }
@@ -249,7 +273,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       final payment = _currentMonthPayments[s.uid];
       return payment == null || payment.paidAmount == 0;
     }).length;
-    
+
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.grey.shade100,
@@ -268,8 +292,18 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
   Widget _buildStatItem(String label, String value, Color color) {
     return Column(
       children: [
-        Text(value, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: color)),
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: color,
+          ),
+        ),
+        Text(
+          label,
+          style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+        ),
       ],
     );
   }
@@ -279,11 +313,25 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.people_outline, size: 80, color: Theme.of(context).colorScheme.outline),
+          Icon(
+            Icons.people_outline,
+            size: 80,
+            color: Theme.of(context).colorScheme.outline,
+          ),
           const SizedBox(height: 16),
-          Text('No Students Found', style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: Theme.of(context).colorScheme.outline)),
+          Text(
+            'No Students Found',
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
           const SizedBox(height: 8),
-          Text('Try adjusting your filters', style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Theme.of(context).colorScheme.outline)),
+          Text(
+            'Try adjusting your filters',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.outline,
+            ),
+          ),
         ],
       ),
     );
@@ -317,7 +365,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             sortAscending: _sortAscending,
             headingRowColor: MaterialStateProperty.all(Colors.blue.shade50),
             border: TableBorder(
-              horizontalInside: BorderSide(color: Colors.grey.shade200, width: 1),
+              horizontalInside: BorderSide(
+                color: Colors.grey.shade200,
+                width: 1,
+              ),
             ),
             columns: [
               DataColumn(
@@ -327,7 +378,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     children: [
                       Icon(Icons.person, size: 16, color: Colors.blue.shade700),
                       const SizedBox(width: 4),
-                      const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Name',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -340,7 +394,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     children: [
                       Icon(Icons.phone, size: 16, color: Colors.blue.shade700),
                       const SizedBox(width: 4),
-                      const Text('Phone', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Phone',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -353,7 +410,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     children: [
                       Icon(Icons.school, size: 16, color: Colors.blue.shade700),
                       const SizedBox(width: 4),
-                      const Text('University', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'University',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -364,9 +424,16 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   width: 100,
                   child: Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 16, color: Colors.blue.shade700),
+                      Icon(
+                        Icons.calendar_today,
+                        size: 16,
+                        color: Colors.blue.shade700,
+                      ),
                       const SizedBox(width: 4),
-                      const Text('Registered', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Registered',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -377,9 +444,16 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   width: 90,
                   child: Row(
                     children: [
-                      Icon(Icons.attach_money, size: 16, color: Colors.blue.shade700),
+                      Icon(
+                        Icons.attach_money,
+                        size: 16,
+                        color: Colors.blue.shade700,
+                      ),
                       const SizedBox(width: 4),
-                      const Text('Cost', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Cost',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -391,9 +465,16 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   width: 120,
                   child: Row(
                     children: [
-                      Icon(Icons.payment, size: 16, color: Colors.blue.shade700),
+                      Icon(
+                        Icons.payment,
+                        size: 16,
+                        color: Colors.blue.shade700,
+                      ),
                       const SizedBox(width: 4),
-                      const Text('Payment', style: TextStyle(fontWeight: FontWeight.bold)),
+                      const Text(
+                        'Payment',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ],
                   ),
                 ),
@@ -402,7 +483,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               const DataColumn(
                 label: SizedBox(
                   width: 100,
-                  child: Text('Status', style: TextStyle(fontWeight: FontWeight.bold)),
+                  child: Text(
+                    'Status',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                 ),
               ),
             ],
@@ -410,7 +494,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
               final index = entry.key;
               final student = entry.value;
               final payment = _currentMonthPayments[student.uid];
-              
+
               return DataRow(
                 color: MaterialStateProperty.resolveWith<Color?>((states) {
                   if (states.contains(MaterialState.selected)) {
@@ -419,11 +503,17 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                   if (states.contains(MaterialState.hovered)) {
                     return Colors.grey.shade50;
                   }
-                  return index.isEven ? Colors.white : Colors.grey.shade50.withOpacity(0.5);
+                  return index.isEven
+                      ? Colors.white
+                      : Colors.grey.shade50.withOpacity(0.5);
                 }),
                 onSelectChanged: (selected) {
                   if (selected == true) {
-                    Navigator.pushNamed(context, '/admin/student_detail', arguments: student);
+                    Navigator.pushNamed(
+                      context,
+                      '/admin/student_detail',
+                      arguments: student,
+                    );
                   }
                 },
                 cells: [
@@ -436,8 +526,14 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             backgroundColor: Colors.blue.shade600,
                             radius: 18,
                             child: Text(
-                              student.fullName.isNotEmpty ? student.fullName[0].toUpperCase() : '?',
-                              style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold),
+                              student.fullName.isNotEmpty
+                                  ? student.fullName[0].toUpperCase()
+                                  : '?',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -446,7 +542,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               student.fullName,
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
-                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Colors.black87),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w600,
+                                fontSize: 14,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
                         ],
@@ -458,13 +558,20 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                       width: 120,
                       child: Row(
                         children: [
-                          Icon(Icons.phone_android, size: 14, color: Colors.grey.shade600),
+                          Icon(
+                            Icons.phone_android,
+                            size: 14,
+                            color: Colors.grey.shade600,
+                          ),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               student.phoneNumber,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 13, color: Colors.grey.shade800),
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade800,
+                              ),
                             ),
                           ),
                         ],
@@ -478,7 +585,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         student.university,
                         overflow: TextOverflow.ellipsis,
                         maxLines: 2,
-                        style: TextStyle(fontSize: 13, color: Colors.grey.shade700),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade700,
+                        ),
                       ),
                     ),
                   ),
@@ -486,14 +596,21 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     SizedBox(
                       width: 100,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.purple.shade50,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: Text(
                           DateFormat('MMM dd, yyyy').format(student.createdAt),
-                          style: TextStyle(fontSize: 11, color: Colors.purple.shade700, fontWeight: FontWeight.w500),
+                          style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.purple.shade700,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -502,7 +619,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                     SizedBox(
                       width: 90,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.green.shade50,
                           borderRadius: BorderRadius.circular(8),
@@ -510,18 +630,24 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                         ),
                         child: Text(
                           '\$${student.subscriptionCost.toStringAsFixed(2)}',
-                          style: TextStyle(fontWeight: FontWeight.w700, color: Colors.green.shade700, fontSize: 13),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                            color: Colors.green.shade700,
+                            fontSize: 13,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
                     ),
                   ),
-                  DataCell(SizedBox(width: 120, child: _buildPaymentStatusChip(payment))),
                   DataCell(
                     SizedBox(
-                      width: 100,
-                      child: _buildActiveToggle(student),
+                      width: 120,
+                      child: _buildPaymentStatusChip(payment),
                     ),
+                  ),
+                  DataCell(
+                    SizedBox(width: 100, child: _buildActiveToggle(student)),
                   ),
                 ],
               );
@@ -549,19 +675,23 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             const SizedBox(width: 4),
             Text(
               'No Data',
-              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.grey.shade700),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: Colors.grey.shade700,
+              ),
               textAlign: TextAlign.center,
             ),
           ],
         ),
       );
     }
-    
+
     Color color;
     Color bgColor;
     String text;
     IconData icon;
-    
+
     if (payment.isFullyPaid) {
       color = Colors.green.shade700;
       bgColor = Colors.green.shade50;
@@ -578,7 +708,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       text = 'Unpaid';
       icon = Icons.cancel;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -618,19 +748,19 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
       onChanged: (value) async {
         try {
           await _studentService.toggleStudentActiveStatus(student.uid, value);
-          
+
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(
-                  value 
-                    ? '${student.fullName} is now active'
-                    : '${student.fullName} has been deactivated and removed from all trips',
+                  value
+                      ? '${student.fullName} is now active'
+                      : '${student.fullName} has been deactivated and removed from all trips',
                 ),
                 backgroundColor: value ? Colors.green : Colors.orange,
               ),
             );
-            
+
             // Reload students to reflect the change
             _loadStudents();
           }

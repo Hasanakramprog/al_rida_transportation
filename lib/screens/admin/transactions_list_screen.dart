@@ -16,11 +16,11 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
   final AccountingService _accountingService = AccountingService();
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
-  
+
   FilterType _selectedFilter = FilterType.all;
   DateTime _selectedDate = DateTime.now();
   String _searchQuery = '';
-  
+
   List<PaymentTransaction> _transactions = [];
   DocumentSnapshot? _lastDocument;
   bool _isLoading = false;
@@ -62,25 +62,28 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
 
     try {
       List<PaymentTransaction> newTransactions;
-      
+
       if (_selectedFilter == FilterType.all) {
         newTransactions = await _accountingService.getPaginatedTransactions(
           lastDocument: _lastDocument,
         );
       } else {
         final dateRange = _getDateRange();
-        newTransactions = await _accountingService.getPaginatedTransactionsByDateRange(
-          startDate: dateRange['start']!,
-          endDate: dateRange['end']!,
-          lastDocument: _lastDocument,
-        );
+        newTransactions = await _accountingService
+            .getPaginatedTransactionsByDateRange(
+              startDate: dateRange['start']!,
+              endDate: dateRange['end']!,
+              lastDocument: _lastDocument,
+            );
       }
 
       if (newTransactions.isNotEmpty) {
         // Get the last document for next pagination
         final lastTransaction = newTransactions.last;
-        final doc = await _accountingService.getDocumentSnapshot(lastTransaction.id);
-        
+        final doc = await _accountingService.getDocumentSnapshot(
+          lastTransaction.id,
+        );
+
         setState(() {
           _transactions.addAll(newTransactions);
           _lastDocument = doc;
@@ -114,8 +117,22 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
         };
       case FilterType.month:
         return {
-          'start': DateTime(_selectedDate.year, _selectedDate.month, 1, 0, 0, 0),
-          'end': DateTime(_selectedDate.year, _selectedDate.month + 1, 0, 23, 59, 59),
+          'start': DateTime(
+            _selectedDate.year,
+            _selectedDate.month,
+            1,
+            0,
+            0,
+            0,
+          ),
+          'end': DateTime(
+            _selectedDate.year,
+            _selectedDate.month + 1,
+            0,
+            23,
+            59,
+            59,
+          ),
         };
       case FilterType.year:
         return {
@@ -123,10 +140,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
           'end': DateTime(_selectedDate.year, 12, 31, 23, 59, 59),
         };
       case FilterType.all:
-        return {
-          'start': DateTime(2000, 1, 1),
-          'end': DateTime(2100, 12, 31),
-        };
+        return {'start': DateTime(2000, 1, 1), 'end': DateTime(2100, 12, 31)};
     }
   }
 
@@ -143,27 +157,22 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Colors.green.shade50,
-              Colors.white,
-            ],
+            colors: [Colors.green.shade50, Colors.white],
           ),
         ),
         child: Column(
           children: [
             // Search Bar
             _buildSearchBar(),
-            
+
             // Filter Chips
             _buildFilterSection(),
-            
+
             // Summary Stats Bar
             _buildSummaryBar(),
-            
+
             // Transactions List
-            Expanded(
-              child: _buildTransactionsList(),
-            ),
+            Expanded(child: _buildTransactionsList()),
           ],
         ),
       ),
@@ -224,9 +233,17 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             const SizedBox(width: 8),
             _buildFilterChip('Today', FilterType.today, Icons.today),
             const SizedBox(width: 8),
-            _buildFilterChip('This Month', FilterType.month, Icons.calendar_month),
+            _buildFilterChip(
+              'This Month',
+              FilterType.month,
+              Icons.calendar_month,
+            ),
             const SizedBox(width: 8),
-            _buildFilterChip('This Year', FilterType.year, Icons.calendar_today),
+            _buildFilterChip(
+              'This Year',
+              FilterType.year,
+              Icons.calendar_today,
+            ),
           ],
         ),
       ),
@@ -289,25 +306,19 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             label: 'Showing',
             value: '$count${!_hasMore ? "" : "+"}',
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: Colors.white.withOpacity(0.3),
-          ),
+          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
           _buildSummaryStat(
             icon: Icons.account_balance_wallet,
             label: 'Total',
             value: '\$${balance.toStringAsFixed(0)}',
           ),
-          Container(
-            width: 1,
-            height: 40,
-            color: Colors.white.withOpacity(0.3),
-          ),
+          Container(width: 1, height: 40, color: Colors.white.withOpacity(0.3)),
           _buildSummaryStat(
             icon: Icons.trending_up,
             label: 'Average',
-            value: count > 0 ? '\$${(balance / count).toStringAsFixed(0)}' : '\$0',
+            value: count > 0
+                ? '\$${(balance / count).toStringAsFixed(0)}'
+                : '\$0',
           ),
         ],
       ),
@@ -325,10 +336,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
         const SizedBox(height: 4),
         Text(
           label,
-          style: const TextStyle(
-            color: Colors.white70,
-            fontSize: 11,
-          ),
+          style: const TextStyle(color: Colors.white70, fontSize: 11),
         ),
         const SizedBox(height: 2),
         Text(
@@ -376,10 +384,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
               _searchQuery.isNotEmpty
                   ? 'Try a different search term'
                   : 'Transactions will appear here when students make payments',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey.shade500,
-              ),
+              style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
               textAlign: TextAlign.center,
             ),
           ],
@@ -410,13 +415,10 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
             padding: const EdgeInsets.all(8),
             color: Colors.grey.shade100,
             child: Text(
-              _hasMore 
+              _hasMore
                   ? 'Loaded ${filteredTransactions.length} transactions • Tap "Load More" for next batch'
                   : 'All ${filteredTransactions.length} transactions loaded',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade600,
-              ),
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
               textAlign: TextAlign.center,
             ),
           ),
@@ -448,7 +450,10 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                   onTap: _loadMoreTransactions,
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 16,
+                    ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -474,14 +479,18 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
   }
 
   Widget _buildTransactionCard(PaymentTransaction transaction, int index) {
-    final isOperatingPayment = transaction.paymentType.toLowerCase().contains('operating payment');
-    final isDriverTransfer = transaction.paymentType.toLowerCase().contains('driver transfer');
-    
+    final isOperatingPayment = transaction.paymentType.toLowerCase().contains(
+      'operating payment',
+    );
+    final isDriverTransfer = transaction.paymentType.toLowerCase().contains(
+      'driver transfer',
+    );
+
     Color cardColor;
     Color textColor;
     IconData iconData;
     String badgeLabel;
-    
+
     if (isOperatingPayment) {
       cardColor = Colors.red.shade100;
       textColor = Colors.red.shade700;
@@ -503,13 +512,11 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
       iconData = Icons.person;
       badgeLabel = transaction.paymentType.toUpperCase();
     }
-    
+
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 2,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         onTap: () => _showTransactionDetails(transaction),
         borderRadius: BorderRadius.circular(12),
@@ -528,11 +535,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                         color: cardColor,
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: Icon(
-                        iconData,
-                        color: textColor,
-                        size: 24,
-                      ),
+                      child: Icon(iconData, color: textColor, size: 24),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -564,7 +567,11 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        Icon(Icons.calendar_today, size: 12, color: Colors.grey.shade600),
+                        Icon(
+                          Icons.calendar_today,
+                          size: 12,
+                          color: Colors.grey.shade600,
+                        ),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
@@ -584,7 +591,11 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                     const SizedBox(height: 2),
                     Row(
                       children: [
-                        Icon(Icons.access_time, size: 12, color: Colors.grey.shade500),
+                        Icon(
+                          Icons.access_time,
+                          size: 12,
+                          color: Colors.grey.shade500,
+                        ),
                         const SizedBox(width: 4),
                         Text(
                           transaction.formattedDate,
@@ -612,13 +623,14 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                   ),
                   const SizedBox(height: 6),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
                     decoration: BoxDecoration(
                       color: cardColor.withOpacity(0.5),
                       borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: cardColor,
-                      ),
+                      border: Border.all(color: cardColor),
                     ),
                     child: Text(
                       badgeLabel,
@@ -682,11 +694,31 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-              _buildDetailRow('Student Name', transaction.studentName, Icons.person),
-              _buildDetailRow('Amount', transaction.formattedAmount, Icons.attach_money),
-              _buildDetailRow('Payment Type', transaction.paymentType.toUpperCase(), Icons.payment),
-              _buildDetailRow('Period', transaction.subscriptionPeriod, Icons.calendar_month),
-              _buildDetailRow('Date & Time', transaction.formattedDate, Icons.access_time),
+              _buildDetailRow(
+                'Student Name',
+                transaction.studentName,
+                Icons.person,
+              ),
+              _buildDetailRow(
+                'Amount',
+                transaction.formattedAmount,
+                Icons.attach_money,
+              ),
+              _buildDetailRow(
+                'Payment Type',
+                transaction.paymentType.toUpperCase(),
+                Icons.payment,
+              ),
+              _buildDetailRow(
+                'Period',
+                transaction.subscriptionPeriod,
+                Icons.calendar_month,
+              ),
+              _buildDetailRow(
+                'Date & Time',
+                transaction.formattedDate,
+                Icons.access_time,
+              ),
               if (transaction.notes != null && transaction.notes!.isNotEmpty)
                 _buildDetailRow('Notes', transaction.notes!, Icons.note),
               const SizedBox(height: 16),
@@ -711,10 +743,7 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
               children: [
                 Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
+                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                 ),
                 const SizedBox(height: 2),
                 Text(
@@ -732,11 +761,13 @@ class _TransactionsListScreenState extends State<TransactionsListScreen> {
     );
   }
 
-  List<PaymentTransaction> _getFilteredTransactions(List<PaymentTransaction> transactions) {
+  List<PaymentTransaction> _getFilteredTransactions(
+    List<PaymentTransaction> transactions,
+  ) {
     if (_searchQuery.isEmpty) {
       return transactions;
     }
-    
+
     return transactions.where((transaction) {
       return transaction.studentName.toLowerCase().contains(_searchQuery);
     }).toList();

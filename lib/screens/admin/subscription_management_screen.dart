@@ -6,23 +6,26 @@ class SubscriptionManagementScreen extends StatefulWidget {
   const SubscriptionManagementScreen({super.key});
 
   @override
-  State<SubscriptionManagementScreen> createState() => _SubscriptionManagementScreenState();
+  State<SubscriptionManagementScreen> createState() =>
+      _SubscriptionManagementScreenState();
 }
 
-class _SubscriptionManagementScreenState extends State<SubscriptionManagementScreen> with SingleTickerProviderStateMixin {
+class _SubscriptionManagementScreenState
+    extends State<SubscriptionManagementScreen>
+    with SingleTickerProviderStateMixin {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final _formKey = GlobalKey<FormState>();
-  
+
   late TabController _tabController;
-  
+
   // Schedule Suffixes
   List<ScheduleSuffix> _schedules = [];
   bool _isLoadingSchedules = true;
-  
+
   // Cities
   List<City> _cities = [];
   bool _isLoadingCities = true;
-  
+
   // Form controllers for Schedules
   final _codeController = TextEditingController();
   final _zoneController = TextEditingController();
@@ -30,11 +33,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   final _dailyCostController = TextEditingController();
   final _monthlyCostController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   // Form controllers for Cities
   final _cityNameController = TextEditingController();
   final _cityZoneController = TextEditingController();
-  
+
   String? _editingScheduleId;
   String? _editingCityId;
 
@@ -63,12 +66,12 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   Future<void> _loadSchedules() async {
     try {
       setState(() => _isLoadingSchedules = true);
-      
+
       final snapshot = await _firestore
           .collection('schedule_suffixes')
           .orderBy('code')
           .get();
-      
+
       setState(() {
         _schedules = snapshot.docs
             .map((doc) => ScheduleSuffix.fromFirestore(doc))
@@ -84,17 +87,15 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   Future<void> _loadCities() async {
     try {
       setState(() => _isLoadingCities = true);
-      
+
       final snapshot = await _firestore
           .collection('cities')
           .orderBy('zone')
           .orderBy('name')
           .get();
-      
+
       setState(() {
-        _cities = snapshot.docs
-            .map((doc) => City.fromFirestore(doc))
-            .toList();
+        _cities = snapshot.docs.map((doc) => City.fromFirestore(doc)).toList();
         _isLoadingCities = false;
       });
     } catch (e) {
@@ -154,9 +155,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         _showSnackBar('Schedule updated successfully!', Colors.green);
       } else {
         // Create new
-        await _firestore
-            .collection('schedule_suffixes')
-            .add(data);
+        await _firestore.collection('schedule_suffixes').add(data);
         _showSnackBar('Schedule created successfully!', Colors.green);
       }
 
@@ -173,7 +172,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Delete Schedule'),
-        content: Text('Are you sure you want to delete "${schedule.code}"?\n\nThis action cannot be undone.'),
+        content: Text(
+          'Are you sure you want to delete "${schedule.code}"?\n\nThis action cannot be undone.',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -194,7 +195,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
             .collection('schedule_suffixes')
             .doc(schedule.id)
             .delete();
-        
+
         _showSnackBar('Schedule deleted successfully!', Colors.green);
         _loadSchedules();
       } catch (e) {
@@ -214,16 +215,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
 
       if (_editingCityId != null) {
         // Update existing
-        await _firestore
-            .collection('cities')
-            .doc(_editingCityId)
-            .update(data);
+        await _firestore.collection('cities').doc(_editingCityId).update(data);
         _showSnackBar('City updated successfully!', Colors.green);
       } else {
         // Create new
-        await _firestore
-            .collection('cities')
-            .add(data);
+        await _firestore.collection('cities').add(data);
         _showSnackBar('City created successfully!', Colors.green);
       }
 
@@ -242,16 +238,16 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           .collection('student_profiles')
           .where('cityId', isEqualTo: city.id)
           .get();
-      
+
       // Check if any drivers are using this city
       final driversSnapshot = await _firestore
           .collection('drivers')
           .where('cityId', isEqualTo: city.id)
           .get();
-      
+
       final studentCount = studentsSnapshot.docs.length;
       final driverCount = driversSnapshot.docs.length;
-      
+
       if (studentCount > 0 || driverCount > 0) {
         // Show warning dialog with option to force delete
         final confirm = await showDialog<bool>(
@@ -263,7 +259,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
               '• $studentCount ${studentCount == 1 ? 'student' : 'students'}\n'
               '• $driverCount ${driverCount == 1 ? 'driver' : 'drivers'}\n\n'
               'If you delete this city, it will be removed from all students and drivers.\n\n'
-              'Are you sure you want to continue?'
+              'Are you sure you want to continue?',
             ),
             actions: [
               TextButton(
@@ -278,7 +274,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
             ],
           ),
         );
-        
+
         if (confirm != true) return;
       } else {
         // No students/drivers using this city, show simple confirmation
@@ -286,7 +282,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           context: context,
           builder: (context) => AlertDialog(
             title: const Text('Delete City'),
-            content: Text('Are you sure you want to delete "${city.name}"?\n\nThis action cannot be undone.'),
+            content: Text(
+              'Are you sure you want to delete "${city.name}"?\n\nThis action cannot be undone.',
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context, false),
@@ -300,16 +298,13 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
             ],
           ),
         );
-        
+
         if (confirm != true) return;
       }
-      
+
       // Delete the city
-      await _firestore
-          .collection('cities')
-          .doc(city.id)
-          .delete();
-      
+      await _firestore.collection('cities').doc(city.id).delete();
+
       // Remove city reference from all students
       final batch = _firestore.batch();
       for (var doc in studentsSnapshot.docs) {
@@ -319,16 +314,14 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           'cityZone': 'A',
         });
       }
-      
+
       // Remove city reference from all drivers
       for (var doc in driversSnapshot.docs) {
-        batch.update(doc.reference, {
-          'cityId': '',
-        });
+        batch.update(doc.reference, {'cityId': ''});
       }
-      
+
       await batch.commit();
-      
+
       _showSnackBar(
         'City deleted and removed from ${studentCount + driverCount} ${(studentCount + driverCount) == 1 ? 'record' : 'records'}',
         Colors.green,
@@ -360,10 +353,13 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
               children: [
                 Text(
                   city != null ? 'Edit City' : 'Add New City',
-                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 const SizedBox(height: 24),
-                
+
                 // City Name
                 TextFormField(
                   controller: _cityNameController,
@@ -381,7 +377,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                   },
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Zone
                 TextFormField(
                   controller: _cityZoneController,
@@ -397,14 +393,19 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     if (value == null || value.trim().isEmpty) {
                       return 'Please enter a zone';
                     }
-                    if (!['A', 'B', 'C', 'D'].contains(value.trim().toUpperCase())) {
+                    if (![
+                      'A',
+                      'B',
+                      'C',
+                      'D',
+                    ].contains(value.trim().toUpperCase())) {
                       return 'Zone must be A, B, C, or D';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 24),
-                
+
                 Row(
                   children: [
                     Expanded(
@@ -459,10 +460,13 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                 children: [
                   Text(
                     schedule != null ? 'Edit Schedule' : 'Add New Schedule',
-                    style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 24),
-                  
+
                   // Code
                   TextFormField(
                     controller: _codeController,
@@ -480,7 +484,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Zone
                   TextFormField(
                     controller: _zoneController,
@@ -496,14 +500,19 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                       if (value == null || value.trim().isEmpty) {
                         return 'Please enter a zone';
                       }
-                      if (!['A', 'B', 'C', 'D'].contains(value.trim().toUpperCase())) {
+                      if (![
+                        'A',
+                        'B',
+                        'C',
+                        'D',
+                      ].contains(value.trim().toUpperCase())) {
                         return 'Zone must be A, B, C, or D';
                       }
                       return null;
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Days per week
                   TextFormField(
                     controller: _daysController,
@@ -526,7 +535,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     },
                   ),
                   const SizedBox(height: 16),
-                  
+
                   Row(
                     children: [
                       Expanded(
@@ -538,7 +547,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                             prefixIcon: Icon(Icons.attach_money),
                             border: OutlineInputBorder(),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Required';
@@ -561,7 +572,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                             prefixIcon: Icon(Icons.attach_money),
                             border: OutlineInputBorder(),
                           ),
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                          keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true,
+                          ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Required';
@@ -577,7 +590,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Description
                   TextFormField(
                     controller: _descriptionController,
@@ -596,7 +609,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     },
                   ),
                   const SizedBox(height: 24),
-                  
+
                   Row(
                     children: [
                       Expanded(
@@ -631,9 +644,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
   }
 
   void _showSnackBar(String message, Color color) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message), backgroundColor: color));
   }
 
   @override
@@ -666,10 +679,7 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
       ),
       body: TabBarView(
         controller: _tabController,
-        children: [
-          _buildSchedulesTab(),
-          _buildCitiesTab(),
-        ],
+        children: [_buildSchedulesTab(), _buildCitiesTab()],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
@@ -690,11 +700,15 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
     if (_isLoadingSchedules) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_schedules.isEmpty) {
-      return _buildEmptyState('No Schedules Found', 'Add your first schedule to get started', Icons.schedule);
+      return _buildEmptyState(
+        'No Schedules Found',
+        'Add your first schedule to get started',
+        Icons.schedule,
+      );
     }
-    
+
     return _buildSchedulesList();
   }
 
@@ -702,11 +716,15 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
     if (_isLoadingCities) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_cities.isEmpty) {
-      return _buildEmptyState('No Cities Found', 'Add your first city to get started', Icons.location_city);
+      return _buildEmptyState(
+        'No Cities Found',
+        'Add your first city to get started',
+        Icons.location_city,
+      );
     }
-    
+
     return _buildCitiesList();
   }
 
@@ -719,7 +737,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           const SizedBox(height: 16),
           Text(
             title,
-            style: TextStyle(fontSize: 20, color: Colors.grey.shade600, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              fontSize: 20,
+              color: Colors.grey.shade600,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           Text(
@@ -740,7 +762,9 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: Padding(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -749,7 +773,10 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                 Row(
                   children: [
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.orange.shade100,
                         borderRadius: BorderRadius.circular(8),
@@ -766,14 +793,21 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                     ),
                     const SizedBox(width: 12),
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 4,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.blue.shade50,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         'Zone ${schedule.zone}',
-                        style: TextStyle(fontSize: 12, color: Colors.blue.shade700, fontWeight: FontWeight.w600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue.shade700,
+                          fontWeight: FontWeight.w600,
+                        ),
                       ),
                     ),
                     const Spacer(),
@@ -849,7 +883,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
           Flexible(
             child: Text(
               label,
-              style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                fontSize: 11,
+                color: color,
+                fontWeight: FontWeight.w600,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
@@ -867,9 +905,14 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           elevation: 2,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
           child: ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 12,
+            ),
             leading: CircleAvatar(
               backgroundColor: Colors.blue.shade100,
               child: Icon(Icons.location_city, color: Colors.blue.shade700),
@@ -878,12 +921,18 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
               city.name,
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
             ),
-            subtitle: Text('Zone ${city.zone}', style: const TextStyle(fontSize: 14)),
+            subtitle: Text(
+              'Zone ${city.zone}',
+              style: const TextStyle(fontSize: 14),
+            ),
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.green.shade50,
                     borderRadius: BorderRadius.circular(6),
@@ -891,7 +940,11 @@ class _SubscriptionManagementScreenState extends State<SubscriptionManagementScr
                   ),
                   child: Text(
                     'Zone ${city.zone}',
-                    style: TextStyle(fontSize: 12, color: Colors.green.shade700, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.green.shade700,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 8),

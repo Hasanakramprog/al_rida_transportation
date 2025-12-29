@@ -16,7 +16,7 @@ class PaymentHistoryScreen extends StatefulWidget {
 class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   final MonthlyPaymentService _paymentService = MonthlyPaymentService();
   final StudentProfileService _studentService = StudentProfileService();
-  
+
   bool _isLoading = true;
   List<MonthlyPayment> _paymentHistory = [];
   StudentProfile? _studentProfile;
@@ -33,49 +33,73 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   Future<void> _loadPaymentHistory() async {
     try {
       setState(() => _isLoading = true);
-      
+
       // Get current user
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return;
-      
+
       // Get student profile to know registration date
-      _studentProfile = await _studentService.getStudentProfile(currentUser.uid);
+      _studentProfile = await _studentService.getStudentProfile(
+        currentUser.uid,
+      );
       if (_studentProfile == null) return;
-      
+
       final registrationDate = _studentProfile!.createdAt;
       final currentDate = DateTime.now();
-      
+
       // Generate all months from registration to current
       final payments = <MonthlyPayment>[];
-      DateTime monthIterator = DateTime(registrationDate.year, registrationDate.month, 1);
-      
-      while (monthIterator.isBefore(DateTime(currentDate.year, currentDate.month + 1, 1))) {
+      DateTime monthIterator = DateTime(
+        registrationDate.year,
+        registrationDate.month,
+        1,
+      );
+
+      while (monthIterator.isBefore(
+        DateTime(currentDate.year, currentDate.month + 1, 1),
+      )) {
         final payment = await _paymentService.getPaymentStatus(
           studentUid: _studentProfile!.uid,
           year: monthIterator.year,
           month: monthIterator.month,
         );
-        
+
         if (payment != null) {
           payments.add(payment);
         }
-        
+
         // Move to next month
         if (monthIterator.month == 12) {
           monthIterator = DateTime(monthIterator.year + 1, 1, 1);
         } else {
-          monthIterator = DateTime(monthIterator.year, monthIterator.month + 1, 1);
+          monthIterator = DateTime(
+            monthIterator.year,
+            monthIterator.month + 1,
+            1,
+          );
         }
       }
-      
+
       // Sort by date (newest first)
-      payments.sort((a, b) => DateTime(b.year, b.month).compareTo(DateTime(a.year, a.month)));
-      
+      payments.sort(
+        (a, b) =>
+            DateTime(b.year, b.month).compareTo(DateTime(a.year, a.month)),
+      );
+
       // Calculate totals
-      _totalAmount = payments.fold(0.0, (sum, payment) => sum + payment.monthlyAmount);
-      _totalPaid = payments.fold(0.0, (sum, payment) => sum + payment.paidAmount);
-      _totalRemaining = payments.fold(0.0, (sum, payment) => sum + payment.remainingAmount);
-      
+      _totalAmount = payments.fold(
+        0.0,
+        (sum, payment) => sum + payment.monthlyAmount,
+      );
+      _totalPaid = payments.fold(
+        0.0,
+        (sum, payment) => sum + payment.paidAmount,
+      );
+      _totalRemaining = payments.fold(
+        0.0,
+        (sum, payment) => sum + payment.remainingAmount,
+      );
+
       setState(() {
         _paymentHistory = payments;
         _isLoading = false;
@@ -103,13 +127,13 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _paymentHistory.isEmpty
-              ? _buildEmptyState()
-              : Column(
-                  children: [
-                    _buildSummaryCards(),
-                    Expanded(child: _buildPaymentTable()),
-                  ],
-                ),
+          ? _buildEmptyState()
+          : Column(
+              children: [
+                _buildSummaryCards(),
+                Expanded(child: _buildPaymentTable()),
+              ],
+            ),
     );
   }
 
@@ -178,7 +202,12 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String title, String amount, IconData icon, Color color) {
+  Widget _buildSummaryCard(
+    String title,
+    String amount,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -319,14 +348,16 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
   }
 
   Widget _buildPaymentRow(MonthlyPayment payment, int index) {
-    final monthName = DateFormat('MMM yyyy').format(DateTime(payment.year, payment.month));
+    final monthName = DateFormat(
+      'MMM yyyy',
+    ).format(DateTime(payment.year, payment.month));
     final isEven = index % 2 == 0;
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: isEven 
-            ? Theme.of(context).colorScheme.surface 
+        color: isEven
+            ? Theme.of(context).colorScheme.surface
             : Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.3),
       ),
       child: Row(
@@ -360,9 +391,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             flex: 2,
             child: Text(
               '\$${payment.monthlyAmount.toStringAsFixed(0)}',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 12,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 12),
               textAlign: TextAlign.center,
             ),
           ),
@@ -385,7 +416,9 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             child: Text(
               '\$${payment.remainingAmount.toStringAsFixed(0)}',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: payment.remainingAmount > 0 ? Colors.orange : Colors.green,
+                color: payment.remainingAmount > 0
+                    ? Colors.orange
+                    : Colors.green,
                 fontWeight: FontWeight.w600,
                 fontSize: 12,
               ),
@@ -393,10 +426,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
             ),
           ),
           // Status
-          Expanded(
-            flex: 2,
-            child: _buildStatusChip(payment),
-          ),
+          Expanded(flex: 2, child: _buildStatusChip(payment)),
         ],
       ),
     );
@@ -406,7 +436,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
     Color color;
     String text;
     IconData icon;
-    
+
     if (payment.isFullyPaid) {
       color = Colors.green;
       text = 'Paid';
@@ -420,7 +450,7 @@ class _PaymentHistoryScreenState extends State<PaymentHistoryScreen> {
       text = 'Unpaid';
       icon = Icons.pending;
     }
-    
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
