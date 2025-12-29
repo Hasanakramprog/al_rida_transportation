@@ -241,6 +241,7 @@ class StudentProfile {
   final bool isPaid; // Payment status for current month
   final bool isActive; // Whether student is active or deactivated
   final List<PaymentHistory> paymentHistory; // History of all payments
+  final String? assignedDriverId; // ID of assigned driver (nullable)
   final DateTime createdAt;
   final DateTime? updatedAt;
   final DateTime? paidAt; // When current month payment was made
@@ -259,6 +260,7 @@ class StudentProfile {
     this.isPaid = false,
     this.isActive = true,
     this.paymentHistory = const [],
+    this.assignedDriverId,
     required this.createdAt,
     this.updatedAt,
     this.paidAt,
@@ -290,6 +292,7 @@ class StudentProfile {
       'paymentHistory': paymentHistory
           .map((history) => history.toMap())
           .toList(),
+      'assignedDriverId': assignedDriverId,
       'createdAt': Timestamp.fromDate(createdAt),
       'updatedAt': updatedAt != null ? Timestamp.fromDate(updatedAt!) : null,
       'paidAt': paidAt != null ? Timestamp.fromDate(paidAt!) : null,
@@ -325,6 +328,7 @@ class StudentProfile {
       paymentHistory: (map['paymentHistory'] as List<dynamic>? ?? [])
           .map((item) => PaymentHistory.fromMap(item as Map<String, dynamic>))
           .toList(),
+      assignedDriverId: map['assignedDriverId'],
       createdAt: (map['createdAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
       paidAt: (map['paidAt'] as Timestamp?)?.toDate(),
@@ -426,6 +430,7 @@ class StudentProfile {
     bool? isPaid,
     bool? isActive,
     List<PaymentHistory>? paymentHistory,
+    String? assignedDriverId,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? paidAt,
@@ -444,6 +449,7 @@ class StudentProfile {
       isPaid: isPaid ?? this.isPaid,
       isActive: isActive ?? this.isActive,
       paymentHistory: paymentHistory ?? this.paymentHistory,
+      assignedDriverId: assignedDriverId ?? this.assignedDriverId,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
       paidAt: paidAt ?? this.paidAt,

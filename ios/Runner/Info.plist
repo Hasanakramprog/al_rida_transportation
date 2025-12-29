@@ -45,5 +45,15 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- Location permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Al Rida Transportation needs your location to show your real-time position to students.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Al Rida Transportation needs your location to continuously track your position while driving.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Al Rida Transportation needs your location to track your position in the background.</string>
+	<!-- Google Maps iOS API Key -->
+	<key>GMSApiKey</key>
+	<string>YOUR_GOOGLE_MAPS_API_KEY_HERE</string>
 </dict>
 </plist>

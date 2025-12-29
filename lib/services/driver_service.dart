@@ -21,6 +21,24 @@ class DriverService {
     }
   }
 
+  // Get single driver by ID
+  Future<Driver?> getDriverById(String driverId) async {
+    try {
+      final doc = await _firestore
+          .collection(_driversCollection)
+          .doc(driverId)
+          .get();
+
+      if (!doc.exists) {
+        return null;
+      }
+
+      return Driver.fromFirestore(doc);
+    } catch (e) {
+      throw 'Error fetching driver by ID: $e';
+    }
+  }
+
   // Get drivers by zone
   Future<List<Driver>> getDriversByZone(String zone) async {
     try {

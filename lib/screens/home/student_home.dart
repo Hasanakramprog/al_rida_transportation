@@ -3,11 +3,13 @@ import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/student_profile_service.dart';
 import '../../services/monthly_payment_service.dart';
+import '../../services/driver_service.dart';
 import '../../models/student_profile.dart';
 import '../../models/monthly_payment.dart';
 import '../../models/bus_booking.dart';
 import '../auth/login_screen.dart';
 import '../student/week_calendar_screen.dart';
+import '../student/driver_location_screen.dart';
 
 class StudentHomeScreen extends StatefulWidget {
   const StudentHomeScreen({super.key});
@@ -19,6 +21,7 @@ class StudentHomeScreen extends StatefulWidget {
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
   final _profileService = StudentProfileService();
   final _paymentService = MonthlyPaymentService();
+  final _driverService = DriverService();
   StudentProfile? _studentProfile;
   MonthlyPayment? _currentMonthPayment;
   List<MonthlyPayment> _recentPayments = [];
@@ -833,10 +836,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
           children: [
             Expanded(
               child: ElevatedButton.icon(
-                onPressed: () =>
-                    _showSnackBar(context, 'Track bus feature coming soon!'),
+                onPressed: () => _navigateToDriverLocation(),
                 icon: const Icon(Icons.location_on),
-                label: const Text('Track Bus'),
+                label: const Text('Track Driver'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
                   foregroundColor: Colors.white,
@@ -951,6 +953,52 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message), backgroundColor: Colors.blue),
     );
+  }
+
+  Future<void> _navigateToDriverLocation() async {
+    if (_studentProfile == null) {
+      _showSnackBar(context, 'Profile not loaded');
+      return;
+    }
+
+    try {
+      // Check if student has an assigned driver
+      if (_studentProfile!.assignedDriverId == null ||
+          _studentProfile!.assignedDriverId!.isEmpty) {
+        if (mounted) {
+          _showSnackBar(context, 'No driver assigned to you yet');
+        }
+        return;
+      }
+
+      // Get the assigned driver directly by ID (single Firestore read)
+      final driver = await _driverService.getDriverById(
+        _studentProfile!.assignedDriverId!,
+      );
+
+      if (driver == null) {
+        if (mounted) {
+          _showSnackBar(context, 'Driver not found');
+        }
+        return;
+      }
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DriverLocationScreen(
+              driverId: driver.uid,
+              driverName: driver.fullName,
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        _showSnackBar(context, 'Error: ${e.toString()}');
+      }
+    }
   }
 
   Future<void> _signOut(BuildContext context) async {

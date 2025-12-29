@@ -8,6 +8,7 @@ import '../../services/driver_wallet_service.dart';
 import '../../services/student_profile_service.dart';
 import '../../services/accounting_service.dart';
 import '../../services/driver_payment_service.dart';
+import '../../services/location_service.dart';
 import '../../models/driver.dart';
 import '../../models/student_profile.dart';
 import '../auth/login_screen.dart';
@@ -26,6 +27,7 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   final StudentProfileService _studentService = StudentProfileService();
   final AccountingService _accountingService = AccountingService();
   final DriverPaymentService _driverPaymentService = DriverPaymentService();
+  final LocationService _locationService = LocationService();
   Driver? _driverProfile;
   bool _isLoading = true;
 
@@ -34,10 +36,20 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
   double _cachedBalanceLBP = 0.0;
   bool _isLoadingWallet = false;
 
+  // Location sharing state
+  bool _isSharingLocation = false;
+  bool _isTogglingLocation = false;
+
   @override
   void initState() {
     super.initState();
     _loadDriverProfile();
+  }
+
+  @override
+  void dispose() {
+    _locationService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadWalletData() async {
@@ -141,6 +153,10 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
 
               // Driver Wallet Card
               _buildWalletCard(),
+              const SizedBox(height: 24),
+
+              // Location Sharing Card
+              _buildLocationSharingCard(),
               const SizedBox(height: 24),
 
               // Student Payment Card
@@ -346,7 +362,169 @@ class _DriverHomeScreenState extends State<DriverHomeScreen> {
     );
   }
 
+  Widget _buildLocationSharingCard() {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blue.shade600, Colors.blue.shade800],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Icon(
+                  _isSharingLocation ? Icons.location_on : Icons.location_off,
+                  color: Colors.white,
+                  size: 32,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Location Sharing',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        _isSharingLocation
+                            ? 'Students can see your location'
+                            : 'Share your location with students',
+                        style: const TextStyle(
+                          color: Colors.white70,
+                          fontSize: 12,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_isTogglingLocation)
+                  const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      strokeWidth: 2,
+                    ),
+                  )
+                else
+                  Switch(
+                    value: _isSharingLocation,
+                    onChanged: (value) => _toggleLocationSharing(),
+                    activeColor: Colors.white,
+                    activeTrackColor: Colors.green.shade300,
+                    inactiveThumbColor: Colors.white70,
+                    inactiveTrackColor: Colors.grey.shade400,
+                  ),
+              ],
+            ),
+            if (_isSharingLocation) ...[
+              const SizedBox(height: 12),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.info_outline,
+                      color: Colors.white,
+                      size: 16,
+                    ),
+                    const SizedBox(width: 8),
+                    const Expanded(
+                      child: Text(
+                        'Updates every 30 seconds (optimized for battery)',
+                        style: TextStyle(color: Colors.white, fontSize: 11),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _toggleLocationSharing() async {
+    if (_driverProfile == null) return;
+
+    setState(() => _isTogglingLocation = true);
+
+    try {
+      if (_isSharingLocation) {
+        // Stop sharing location
+        await _locationService.stopLocationSharing(_driverProfile!.uid);
+        setState(() {
+          _isSharingLocation = false;
+          _isTogglingLocation = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location sharing stopped'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      } else {
+        // Start sharing location
+        await _locationService.startLocationSharing(_driverProfile!.uid);
+        setState(() {
+          _isSharingLocation = true;
+          _isTogglingLocation = false;
+        });
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Location sharing started'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      setState(() => _isTogglingLocation = false);
+      if (mounted) {
+        // Parse error message for better user feedback
+        String errorMsg = e.toString();
+        if (errorMsg.contains('Exception:')) {
+          errorMsg = errorMsg.replaceAll('Exception:', '').trim();
+        }
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(errorMsg),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _signOut(BuildContext context) async {
+    // Stop location sharing when logging out
+    if (_isSharingLocation && _driverProfile != null) {
+      await _locationService.stopLocationSharing(_driverProfile!.uid);
+    }
+
     final authService = Provider.of<AuthService>(context, listen: false);
     await authService.signOut();
 
